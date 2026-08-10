@@ -1,0 +1,472 @@
+import React, { useState, useEffect } from 'react';
+import '../assets/style/login.css';
+import bgLogin from '../assets/gambar/background_login.jpeg';
+
+// Base URL backend Laravel, diambil dari .env (VITE_API_BASE_URL).
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+
+const Login = () => {
+  // State untuk menyimpan input user
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+    captchaAnswer: ''
+  });
+
+  // State untuk UI dan data dari server
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [captcha, setCaptcha] = useState({ id: '', svg: '' });
+  const [alert, setAlert] = useState(null);
+
+  // State Tambahan untuk OTP
+  const [isOtpStep, setIsOtpStep] = useState(false);
+  const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
+
+  // Fungsi mengambil captcha dari API Backend
+  const fetchCaptcha = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/auth/captcha`, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (data && data.data && data.data.captcha) {
+        setCaptcha({
+          id: data.data.captcha.id,
+          svg: data.data.captcha.svg
+        });
+      }
+    } catch (error) {
+      console.error('Gagal memuat captcha:', error);
+
+      setCaptcha({
+        id: '',
+        svg: `
+          <span style="
+            font-size:12px;
+            color:#dc2626;
+            padding:8px;
+          ">
+            Gagal memuat captcha
+          </span>
+        `
+      });
+    }
+  };
+
+  // Jalankan saat halaman pertama kali dibuka
+  useEffect(() => {
+    fetchCaptcha();
+
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get('error')) {
+      setAlert({
+        type: 'error',
+        message: 'Username, password, atau captcha tidak valid.'
+      });
+    } else if (params.get('expired')) {
+      setAlert({
+        type: 'info',
+        message: 'Sesi Anda telah berakhir. Silakan login kembali.'
+      });
+    } else if (params.get('logout')) {
+      setAlert({
+        type: 'info',
+        message: 'Anda telah keluar dari sesi SSO.'
+      });
+    }
+  }, []);
+
+  // Handle perubahan input form login
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Handle submit form login awal (berpindah ke step OTP)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    console.log('Data login dikirim:', {
+      ...formData,
+      captcha_id: captcha.id
+    });
+
+    // Simulasi respons backend, lalu pindah ke langkah OTP
+    setTimeout(() => {
+      setIsLoading(false);
+      setIsOtpStep(true);
+      setAlert({
+        type: 'info',
+        message: 'Kode OTP telah dikirimkan ke perangkat Anda. Silakan masukkan di bawah.'
+      });
+    }, 1500);
+  };
+
+  // Handle perubahan input OTP (pindah fokus otomatis & hanya angka)
+  const handleOtpChange = (index, value) => {
+    if (!/^[0-9]*$/.test(value)) return;
+
+    const newOtp = [...otpValues];
+    newOtp[index] = value;
+    setOtpValues(newOtp);
+
+    if (value !== '' && index < 5) {
+      document.getElementById(`otp-input-${index + 1}`)?.focus();
+    }
+  };
+
+  // Handle tombol Backspace pada input OTP
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && otpValues[index] === '' && index > 0) {
+      document.getElementById(`otp-input-${index - 1}`)?.focus();
+    }
+  };
+
+  // Handle submit OTP
+  const handleOtpSubmit = (e) => {
+    e.preventDefault();
+    const otpCode = otpValues.join('');
+
+    if (otpCode.length < 6) {
+      setAlert({
+        type: 'error',
+        message: 'Silakan isi 6 digit kode OTP dengan lengkap.'
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    console.log('Kode OTP diverifikasi:', otpCode);
+
+    // Simulasi verifikasi OTP sukses
+    setTimeout(() => {
+      setIsLoading(false);
+      setAlert({
+        type: 'info',
+        message: 'Verifikasi berhasil! Mengalihkan ke dashboard...'
+      });
+    }, 1500);
+  };
+
+  return (
+    <div className="container">
+      {/* ================= BAGIAN KIRI ================= */}
+      <div
+        className="left-panel"
+        style={{ backgroundImage: `url(${bgLogin})` }}
+      >
+        <div className="overlay"></div>
+        <div className="content-wrapper">
+          <div className="brand">
+            <div className="logo-icon">
+              <i className="fa-solid fa-heart-pulse"></i>
+            </div>
+
+            <div className="brand-text">
+              <h1>RSJD AMINO HOSPITAL</h1>
+              <p>Single Sign-On Portal</p>
+            </div>
+          </div>
+
+          <div className="main-text">
+            <h2>
+              Satu akun,
+              <br />
+              empat aplikasi rumah sakit.
+            </h2>
+
+            <p>
+              Cukup masuk sekali untuk mengakses semua layanan internal secara aman
+              dan cepat.
+            </p>
+          </div>
+
+          <div className="features-grid">
+            <div className="feature-card">
+              <i className="fa-solid fa-stethoscope"></i>
+              <h3>SIMRS</h3>
+              <p>Sistem informasi manajemen rumah sakit.</p>
+            </div>
+
+            <div className="feature-card">
+              <i className="fa-solid fa-heart-circle-check"></i>
+              <h3>AMINO_MOBILE</h3>
+              <p>Layanan mobile untuk staf dan pasien.</p>
+            </div>
+
+            <div className="feature-card">
+              <i className="fa-solid fa-capsules"></i>
+              <h3>LAPOR_AMINO</h3>
+              <p>Kanal pelaporan dan pengaduan internal.</p>
+            </div>
+
+            <div className="feature-card">
+              <i className="fa-regular fa-user"></i>
+              <h3>WBS</h3>
+              <p>Whistleblowing system untuk pelaporan pelanggaran.</p>
+            </div>
+          </div>
+
+          <div className="footer-left">
+            <p>
+              &copy; 2026 RSJD Amino Hospital - Divisi Teknologi Informasi
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ================= BAGIAN KANAN ================= */}
+      <div className="right-panel">
+        <div className="login-wrapper">
+          <div className="login-header">
+            <div className="login-icon">
+              <i
+                className={`fa-solid ${isOtpStep ? 'fa-shield-halved' : 'fa-lock'}`}
+                style={{
+                  fontSize: '24px',
+                  color: '#16a385',
+                  marginBottom: '15px'
+                }}
+              ></i>
+            </div>
+
+            <h2>{isOtpStep ? 'Verifikasi OTP' : 'Selamat datang'}</h2>
+
+            <p>
+              {isOtpStep
+                ? 'Masukkan 6 digit kode keamanan yang dikirimkan ke nomor Anda.'
+                : 'Masuk dengan akun pegawai untuk melanjutkan ke portal aplikasi.'}
+            </p>
+          </div>
+
+          {/* ================= ALERT ================= */}
+          {alert && (
+            <div
+              className={`alert ${
+                alert.type === 'error' ? 'alert-error' : 'alert-info'
+              }`}
+              style={{
+                color: alert.type === 'error' ? '#dc2626' : '#0284c7',
+                background: alert.type === 'error' ? '#fef2f2' : '#f0f9ff',
+                padding: '12px',
+                borderRadius: '8px',
+                marginBottom: '20px',
+                fontSize: '13px'
+              }}
+            >
+              <i
+                className={`fa-solid ${
+                  alert.type === 'error'
+                    ? 'fa-circle-exclamation'
+                    : alert.message.includes('keluar')
+                    ? 'fa-right-from-bracket'
+                    : 'fa-clock'
+                }`}
+              ></i>{' '}
+              {alert.message}
+            </div>
+          )}
+
+          {/* ================= RENDER FORM BERDASARKAN STEP ================= */}
+          {!isOtpStep ? (
+            /* --- FORM 1: LOGIN UTAMA --- */
+            <form onSubmit={handleSubmit} className="login-form">
+              {/* USERNAME */}
+              <div className="form-group">
+                <label htmlFor="username">Username / NIP</label>
+                <div className="input-icon">
+                  <i className="fa-regular fa-user icon-left"></i>
+                  <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    placeholder="Masukkan username"
+                    required
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              {/* PASSWORD */}
+              <div className="form-group">
+                <label htmlFor="password">Kata sandi</label>
+                <div className="input-icon">
+                  <i className="fa-solid fa-lock icon-left"></i>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Masukkan kata sandi"
+                    required
+                  />
+                  <i
+                    className={`fa-solid ${
+                      showPassword ? 'fa-eye-slash' : 'fa-eye'
+                    } icon-right`}
+                    onClick={() => setShowPassword(!showPassword)}
+                    title={
+                      showPassword ? 'Sembunyikan sandi' : 'Tampilkan sandi'
+                    }
+                    style={{ cursor: 'pointer' }}
+                  ></i>
+                </div>
+              </div>
+
+              {/* CAPTCHA */}
+              <div className="form-group">
+                <label htmlFor="captcha_answer">Kode Captcha</label>
+                <div className="captcha-container">
+                  <div
+                    className="captcha-box"
+                    dangerouslySetInnerHTML={{ __html: captcha.svg }}
+                  />
+                  <button
+                    type="button"
+                    className="btn-refresh"
+                    onClick={fetchCaptcha}
+                    title="Ganti Captcha"
+                  >
+                    <i className="fa-solid fa-rotate-right"></i>
+                  </button>
+                </div>
+
+                <div className="input-icon">
+                  <i className="fa-solid fa-shield-keyhole icon-left"></i>
+                  <input
+                    type="text"
+                    id="captcha_answer"
+                    name="captchaAnswer"
+                    value={formData.captchaAnswer}
+                    onChange={handleChange}
+                    placeholder="Masukkan kode captcha di atas"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* TOMBOL LOGIN */}
+              <button
+                type="submit"
+                className="btn-login"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <i className="fa-solid fa-spinner fa-spin"></i> Memprose...
+                  </>
+                ) : (
+                  <>
+                    <i className="fa-solid fa-right-to-bracket"></i> Masuk ke Portal
+                  </>
+                )}
+              </button>
+            </form>
+          ) : (
+            /* --- FORM 2: VERIFIKASI OTP --- */
+            <form onSubmit={handleOtpSubmit} className="login-form">
+              <div className="form-group" style={{ marginBottom: '24px' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '8px',
+                    justifyContent: 'center',
+                    marginTop: '10px'
+                  }}
+                >
+                  {otpValues.map((val, idx) => (
+                    <input
+                      key={idx}
+                      id={`otp-input-${idx}`}
+                      type="text"
+                      maxLength="1"
+                      value={val}
+                      onChange={(e) => handleOtpChange(idx, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                      className="otp-box"
+                      autoFocus={idx === 0}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* TOMBOL VERIFIKASI OTP */}
+              <button
+                type="submit"
+                className="btn-login"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <i className="fa-solid fa-spinner fa-spin"></i> Memverifikasi...
+                  </>
+                ) : (
+                  <>
+                    <i className="fa-solid fa-circle-check"></i> Verifikasi Kode
+                  </>
+                )}
+              </button>
+
+              {/* KEMBALI KE FORM LOGIN */}
+              <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOtpStep(false);
+                    setAlert(null);
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#16a385',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <i className="fa-solid fa-arrow-left"></i> Kembali ke Form Login
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* ================= SECURITY ================= */}
+          <div className="security-info">
+            <i className="fa-solid fa-shield-halved"></i>
+            <p>
+              Akses dilindungi Single Sign-On. Jangan bagikan kredensial Anda
+              kepada siapa pun.
+            </p>
+          </div>
+
+          {/* ================= SUPPORT ================= */}
+          <div className="support-info">
+            <p>
+              Kendala login? Hubungi <strong>IT Support ext. 1123</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Login;
