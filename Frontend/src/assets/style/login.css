@@ -118,6 +118,26 @@ html, body {
     opacity: 0.92;
 }
 
+/* Styling Kotak Input OTP */
+.otp-box {
+    width: 44px;
+    height: 52px;
+    font-size: 22px;
+    font-weight: 700;
+    text-align: center;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    outline: none;
+    transition: all 0.2s ease-in-out;
+    background-color: #f8fafc;
+    color: #0f172a;
+}
+
+.otp-box:focus {
+    border-color: #16a385;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(22, 163, 133, 0.15);
+}
 /* ---------- Features Grid ---------- */
 .features-grid {
     display: grid;
