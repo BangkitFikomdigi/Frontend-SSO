@@ -3,7 +3,7 @@ import '../assets/style/login.css';
 import bgLogin from '../assets/gambar/background_login.jpeg';
 
 // Base URL backend Laravel, diambil dari .env (VITE_API_BASE_URL).
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://192.168.4.22:8000';
 
 const Login = () => {
   // State untuk menyimpan input user
@@ -27,14 +27,22 @@ const Login = () => {
   // Fungsi mengambil captcha dari API Backend
   const fetchCaptcha = async () => {
     try {
-      const response = await fetch(`${API_BASE}/auth/captcha`, {
+      const response = await fetch(`${API_BASE}/api/auth/captcha`, {
         method: 'GET',
         headers: {
           Accept: 'application/json'
         }
       });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      
+      // Cek apakah response adalah JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        throw new Error('Respons captcha bukan JSON. Pastikan endpoint benar (api/auth/captcha).');
+      }
 
       if (data && data.data && data.data.captcha) {
         setCaptcha({
@@ -53,7 +61,7 @@ const Login = () => {
             color:#dc2626;
             padding:8px;
           ">
-            Gagal memuat captcha
+            Gagal memuat captcha: ${error.message}
           </span>
         `
       });
@@ -100,7 +108,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE}/auth/login`, {
+      const response = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -114,7 +122,15 @@ const Login = () => {
         })
       });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      
+      // Cek apakah response adalah JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        throw new Error('Respons dari server bukan JSON. Pastikan endpoint benar (api/auth/login).');
+      }
 
       if (!response.ok) {
         throw new Error(data.message || 'Login gagal. Silakan coba lagi.');
@@ -162,30 +178,67 @@ const Login = () => {
     }
   };
 
-  // Handle submit OTP
-  const handleOtpSubmit = (e) => {
+  // Handle submit OTP (verifikasi ke backend)
+  const handleOtpSubmit = async (e) => {
     e.preventDefault();
     const otpCode = otpValues.join('');
 
-      if (otpCode.length < 6) {
-        setAlert({
-          type: 'error',
-          message: 'Silakan isi 6 digit kode OTP dengan lengkap.'
-        });
-        return;
-      }
+    if (otpCode.length < 6) {
+      setAlert({
+        type: 'error',
+        message: 'Silakan isi 6 digit kode OTP dengan lengkap.'
+      });
+      return;
+    }
 
     setIsLoading(true);
-    console.log('Kode OTP diverifikasi:', otpCode);
 
-    // Simulasi verifikasi OTP sukses
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const response = await fetch(`${API_BASE}/api/auth/verify-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        },
+        body: JSON.stringify({
+          otp_session_id: otpSessionId,
+          otp_code: otpCode
+        })
+      });
+
+      const responseText = await response.text();
+      
+      // Cek apakah response adalah JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        throw new Error('Respons OTP bukan JSON. Pastikan endpoint benar (api/auth/verify-otp).');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Verifikasi OTP gagal. Silakan coba lagi.');
+      }
+
+      // Jika verifikasi sukses, alihkan ke dashboard atau simpan token
       setAlert({
         type: 'info',
-        message: 'Verifikasi berhasil! Mengalihkan ke dashboard...'
+        message: data.message || 'Verifikasi berhasil! Mengalihkan ke dashboard...'
       });
-    }, 1500);
+
+      // Contoh: Simpan token atau redirect
+      if (data.data && data.data.token) {
+        localStorage.setItem('auth_token', data.data.token);
+        window.location.href = '/dashboard'; // Sesuaikan dengan rute dashboard
+      }
+    } catch (error) {
+      setAlert({
+        type: 'error',
+        message: error.message
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
