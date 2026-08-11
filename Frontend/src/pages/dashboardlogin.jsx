@@ -22,6 +22,7 @@ const Login = () => {
   // State Tambahan untuk OTP
   const [isOtpStep, setIsOtpStep] = useState(false);
   const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
+  const [otpSessionId, setOtpSessionId] = useState('');
 
   // Fungsi mengambil captcha dari API Backend
   const fetchCaptcha = async () => {
@@ -93,25 +94,52 @@ const Login = () => {
     }));
   };
 
-  // Handle submit form login awal (berpindah ke step OTP)
+  // Handle submit form login awal (mengirim ke backend untuk request OTP)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    console.log('Data login dikirim:', {
-      ...formData,
-      captcha_id: captcha.id
-    });
-
-    // Simulasi respons backend, lalu pindah ke langkah OTP
-    setTimeout(() => {
-      setIsLoading(false);
-      setIsOtpStep(true);
-      setAlert({
-        type: 'info',
-        message: 'Kode OTP telah dikirimkan ke perangkat Anda. Silakan masukkan di bawah.'
+    try {
+      const response = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+          captcha_id: captcha.id,
+          captcha_answer: formData.captchaAnswer
+        })
       });
-    }, 1500);
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login gagal. Silakan coba lagi.');
+      }
+
+      // Jika backend mengembalikan session_id OTP
+      if (data.data && data.data.otp_session_id) {
+        setOtpSessionId(data.data.otp_session_id);
+        setIsOtpStep(true);
+        setAlert({
+          type: 'info',
+          message: data.message || 'Kode OTP telah dikirimkan ke perangkat Anda. Silakan masukkan di bawah.'
+        });
+      } else {
+        throw new Error('Tidak menerima session ID OTP dari server.');
+      }
+    } catch (error) {
+      setAlert({
+        type: 'error',
+        message: error.message
+      });
+      fetchCaptcha(); // Refresh captcha jika login gagal
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Handle perubahan input OTP (pindah fokus otomatis & hanya angka)
@@ -134,8 +162,8 @@ const Login = () => {
     }
   };
 
-  // Handle submit OTP
-  const handleOtpSubmit = (e) => {
+  // Handle submit OTP (verifikasi ke backend)
+  const handleOtpSubmit = async (e) => {
     e.preventDefault();
     const otpCode = otpValues.join('');
 
@@ -148,16 +176,45 @@ const Login = () => {
     }
 
     setIsLoading(true);
-    console.log('Kode OTP diverifikasi:', otpCode);
 
-    // Simulasi verifikasi OTP sukses
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const response = await fetch(`${API_BASE}/auth/verify-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        },
+        body: JSON.stringify({
+          otp_session_id: otpSessionId,
+          otp_code: otpCode
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Verifikasi OTP gagal. Silakan coba lagi.');
+      }
+
+      // Jika verifikasi sukses, alihkan ke dashboard atau simpan token
       setAlert({
         type: 'info',
-        message: 'Verifikasi berhasil! Mengalihkan ke dashboard...'
+        message: data.message || 'Verifikasi berhasil! Mengalihkan ke dashboard...'
       });
-    }, 1500);
+
+      // Contoh: Simpan token atau redirect
+      if (data.data && data.data.token) {
+        localStorage.setItem('auth_token', data.data.token);
+        window.location.href = '/dashboard'; // Sesuaikan dengan rute dashboard
+      }
+    } catch (error) {
+      setAlert({
+        type: 'error',
+        message: error.message
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -428,7 +485,9 @@ const Login = () => {
                   type="button"
                   onClick={() => {
                     setIsOtpStep(false);
+                    setOtpValues(['', '', '', '', '', '']);
                     setAlert(null);
+                    fetchCaptcha();
                   }}
                   style={{
                     background: 'none',
