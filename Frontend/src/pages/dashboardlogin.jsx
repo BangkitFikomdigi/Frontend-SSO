@@ -137,8 +137,8 @@ const Login = () => {
       }
 
       // Jika backend mengembalikan session_id OTP
-      if (data.data && data.data.otp_session_id) {
-        setOtpSessionId(data.data.otp_session_id);
+      if (data.data && (data.data.session_id || data.data.otp_session_id)) {
+        setOtpSessionId(data.data.session_id || data.data.otp_session_id);
         setIsOtpStep(true);
         setAlert({
           type: 'info',
@@ -201,6 +201,7 @@ const Login = () => {
           Accept: 'application/json'
         },
         body: JSON.stringify({
+          session_id: otpSessionId,
           otp_session_id: otpSessionId,
           otp_code: otpCode
         })
