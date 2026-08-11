@@ -23,6 +23,7 @@ const Login = () => {
   const [isOtpStep, setIsOtpStep] = useState(false);
   const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
   const [otpSessionId, setOtpSessionId] = useState('');
+  const [username, setUsername] = useState(''); // <-- TAMBAHKAN state username
 
   // Fungsi mengambil captcha dari API Backend
   const fetchCaptcha = async () => {
@@ -31,12 +32,12 @@ const Login = () => {
         method: 'GET',
         headers: {
           Accept: 'application/json'
-        }
+        },
+        credentials: 'include'
       });
 
       const responseText = await response.text();
       
-      // Cek apakah response adalah JSON
       let data;
       try {
         data = JSON.parse(responseText);
@@ -119,12 +120,12 @@ const Login = () => {
           password: formData.password,
           captcha_id: captcha.id,
           captcha_answer: formData.captchaAnswer
-        })
+        }),
+        credentials: 'include'
       });
 
       const responseText = await response.text();
       
-      // Cek apakah response adalah JSON
       let data;
       try {
         data = JSON.parse(responseText);
@@ -139,6 +140,7 @@ const Login = () => {
       // Jika backend mengembalikan session_id OTP
       if (data.data && (data.data.session_id || data.data.otp_session_id)) {
         setOtpSessionId(data.data.session_id || data.data.otp_session_id);
+        setUsername(formData.username); // <-- SIMPAN USERNAME
         setIsOtpStep(true);
         setAlert({
           type: 'info',
@@ -202,14 +204,14 @@ const Login = () => {
         },
         body: JSON.stringify({
           session_id: otpSessionId,
-          otp_session_id: otpSessionId,
-          otp_code: otpCode
-        })
+          username: username,          // <-- KIRIM USERNAME
+          otp: otpCode                 // <-- KIRIM OTP (bukan otp_code)
+        }),
+        credentials: 'include'
       });
 
       const responseText = await response.text();
       
-      // Cek apakah response adalah JSON
       let data;
       try {
         data = JSON.parse(responseText);
@@ -227,10 +229,9 @@ const Login = () => {
         message: data.message || 'Verifikasi berhasil! Mengalihkan ke dashboard...'
       });
 
-      // Contoh: Simpan token atau redirect
       if (data.data && data.data.token) {
         localStorage.setItem('auth_token', data.data.token);
-        window.location.href = '/dashboard'; // Sesuaikan dengan rute dashboard
+        window.location.href = '/dashboard';
       }
     } catch (error) {
       setAlert({
