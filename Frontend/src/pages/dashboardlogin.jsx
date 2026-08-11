@@ -134,31 +134,35 @@ const Login = () => {
     }
   };
 
-  // Handle submit OTP
-  const handleOtpSubmit = (e) => {
-    e.preventDefault();
-    const otpCode = otpValues.join('');
+  // Di dalam Login.jsx
+    const handleOtpSubmit = (e) => {
+      e.preventDefault();
+      const otpCode = otpValues.join('');
 
-    if (otpCode.length < 6) {
-      setAlert({
-        type: 'error',
-        message: 'Silakan isi 6 digit kode OTP dengan lengkap.'
-      });
-      return;
-    }
+      if (otpCode.length < 6) {
+        setAlert({
+          type: 'error',
+          message: 'Silakan isi 6 digit kode OTP dengan lengkap.'
+        });
+        return;
+      }
 
-    setIsLoading(true);
-    console.log('Kode OTP diverifikasi:', otpCode);
+      setIsLoading(true);
 
-    // Simulasi verifikasi OTP sukses
-    setTimeout(() => {
-      setIsLoading(false);
-      setAlert({
-        type: 'info',
-        message: 'Verifikasi berhasil! Mengalihkan ke dashboard...'
-      });
-    }, 1500);
-  };
+      // Simulasi verifikasi OTP sukses dari API
+      setTimeout(() => {
+        setIsLoading(false);
+
+        // 1. Simpan dummy token/token asli dari backend
+        const dummyToken = 'abc123ssoTokenExample'; 
+        localStorage.setItem('sso_token', dummyToken);
+
+        // 2. Teruskan ke Dashboard jika props tersedia
+        if (props.onLoginSuccess) {
+          props.onLoginSuccess(dummyToken);
+        }
+      }, 1500);
+    };
 
   return (
     <div className="container">

@@ -1,0 +1,292 @@
+/* ==========================================================================
+   COMPANY DASHBOARD - SSO Portal
+   Stylesheet for dashboard.php (Centered & Background Image Version)
+   ========================================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+html, body {
+    height: 100%;
+    /* Menggunakan gambar rumah sakit sebagai background penuh */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+}
+
+/* ---------- Top navbar ---------- */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    padding: 0 28px;
+    background-color: #16a385;
+    color: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.topbar-title {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.topbar-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 64px;
+    padding: 0 18px;
+    background-color: rgba(0, 0, 0, 0.12);
+    font-weight: 500;
+    cursor: default;
+}
+
+.user-menu {
+    position: relative;
+    margin-left: 6px;
+}
+
+.user-menu-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 10px 14px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+
+.user-menu-btn:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.user-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 54px;
+    background: #ffffff;
+    color: #1f2933;
+    min-width: 180px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+    overflow: hidden;
+    z-index: 20;
+    transform-origin: top right;
+    animation: fadeInDown 0.2s ease-out;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.user-dropdown.open {
+    display: block;
+}
+
+.user-dropdown-name {
+    padding: 12px 16px;
+    font-weight: 600;
+    border-bottom: 1px solid #eef1f4;
+    font-size: 14px;
+}
+
+.user-dropdown form {
+    margin: 0;
+}
+
+.user-dropdown button {
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: none;
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #c0392b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.user-dropdown button:hover {
+    background-color: #fbeaea;
+}
+
+/* ---------- Content ---------- */
+.content {
+    max-width: 1100px;
+    margin: 36px auto;
+    padding: 36px 40px 60px;
+    /* Efek Glassmorphism agar background gambar tetap terlihat estetik */
+    background-color: rgba(255, 255, 255, 0.90);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e3e8ec;
+    margin-bottom: 40px;
+}
+
+.content-header h1 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #334155;
+}
+
+/* ---------- Search Box ---------- */
+.search-box {
+    position: relative;
+    width: 280px;
+}
+
+.search-box i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.search-box input {
+    width: 100%;
+    border: 2px solid transparent;
+    border-radius: 30px; 
+    background-color: #f1f5f9;
+    padding: 10px 16px 10px 36px;
+    font-size: 14px;
+    color: #334155;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.search-box input::placeholder {
+    color: #94a3b8;
+}
+
+.search-box input:focus {
+    background-color: #ffffff;
+    border-color: #16a385;
+    box-shadow: 0 0 0 4px rgba(22, 163, 133, 0.15);
+}
+
+.search-box input:focus + i, 
+.search-box input:focus ~ i {
+    color: #16a385;
+}
+
+/* ---------- App grid (Gaya Card Modern) ---------- */
+.apps-grid {
+    display: grid;
+    /* Membuat persis 2 kolom ke samping */
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 20px;
+    width: 100%;
+}
+
+.app-card {
+    /* Background hijau kebiruan transparan mirip di image_4fe169.jpg */
+    background: rgba(22, 163, 133, 0.65); 
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Menyusun konten ke rata kiri */
+    text-decoration: none;
+    color: #ffffff;
+    transition: all 0.3s ease;
+}
+
+.app-card:hover {
+    background: rgba(22, 163, 133, 0.85); /* Warna menguat saat di-hover */
+    transform: translateY(-4px);
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.card-icon {
+    font-size: 24px;
+    margin-bottom: 16px;
+    color: #ffffff;
+    opacity: 0.9;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+.card-desc {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    opacity: 0.85; /* Teks deskripsi dibuat sedikit lebih redup dari judul */
+}
+
+/* Responsif jika diakses lewat layar kecil/tablet, otomatis jadi 1 kolom */
+@media (max-width: 768px) {
+    .apps-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* ---------- Empty State ---------- */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px 0;
+    color: #64748b;
+    font-weight: 500;
+    font-size: 15px;
+}
