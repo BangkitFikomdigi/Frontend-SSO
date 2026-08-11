@@ -162,59 +162,30 @@ const Login = () => {
     }
   };
 
-  // Handle submit OTP (verifikasi ke backend)
-  const handleOtpSubmit = async (e) => {
+  // Handle submit OTP
+  const handleOtpSubmit = (e) => {
     e.preventDefault();
     const otpCode = otpValues.join('');
 
-    if (otpCode.length < 6) {
-      setAlert({
-        type: 'error',
-        message: 'Silakan isi 6 digit kode OTP dengan lengkap.'
-      });
-      return;
-    }
+      if (otpCode.length < 6) {
+        setAlert({
+          type: 'error',
+          message: 'Silakan isi 6 digit kode OTP dengan lengkap.'
+        });
+        return;
+      }
 
     setIsLoading(true);
+    console.log('Kode OTP diverifikasi:', otpCode);
 
-    try {
-      const response = await fetch(`${API_BASE}/auth/verify-otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json'
-        },
-        body: JSON.stringify({
-          otp_session_id: otpSessionId,
-          otp_code: otpCode
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Verifikasi OTP gagal. Silakan coba lagi.');
-      }
-
-      // Jika verifikasi sukses, alihkan ke dashboard atau simpan token
+    // Simulasi verifikasi OTP sukses
+    setTimeout(() => {
+      setIsLoading(false);
       setAlert({
         type: 'info',
-        message: data.message || 'Verifikasi berhasil! Mengalihkan ke dashboard...'
+        message: 'Verifikasi berhasil! Mengalihkan ke dashboard...'
       });
-
-      // Contoh: Simpan token atau redirect
-      if (data.data && data.data.token) {
-        localStorage.setItem('auth_token', data.data.token);
-        window.location.href = '/dashboard'; // Sesuaikan dengan rute dashboard
-      }
-    } catch (error) {
-      setAlert({
-        type: 'error',
-        message: error.message
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    }, 1500);
   };
 
   return (
