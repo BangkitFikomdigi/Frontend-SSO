@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../assets/style/login.css';
-import bgLogin from '../assets/gambar/background_login.jpeg';
+import bgLogin from '../assets/gambar/background_login.jpg';
 
 // Base URL backend Laravel, diambil dari .env (VITE_API_BASE_URL).
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://192.168.4.22:8000';
