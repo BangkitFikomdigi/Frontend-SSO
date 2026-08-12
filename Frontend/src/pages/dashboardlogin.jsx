@@ -24,6 +24,8 @@ const Login = ({ onLoginSuccess }) => {
   const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
   const [otpSessionId, setOtpSessionId] = useState('');
   const [otpUsername, setOtpUsername] = useState('');
+  const [isResendingOtp, setIsResendingOtp] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   // Fungsi mengambil captcha dari API Backend
   const fetchCaptcha = async () => {
@@ -145,6 +147,7 @@ const Login = ({ onLoginSuccess }) => {
           (data.data.user && data.data.user.username) || formData.username
         );
         setIsOtpStep(true);
+        setResendCooldown(30);
         setAlert({
           type: 'info',
           message: data.message || 'Kode OTP telah dikirimkan ke email Anda. Silakan masukkan di bawah.'
@@ -183,6 +186,67 @@ const Login = ({ onLoginSuccess }) => {
   const handleOtpKeyDown = (index, e) => {
     if (e.key === 'Backspace' && otpValues[index] === '' && index > 0) {
       document.getElementById(`otp-input-${index - 1}`)?.focus();
+    }
+  };
+
+  // Hitung mundur cooldown tombol "Kirim ulang kode"
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  // Handle kirim ulang kode OTP
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0 || isResendingOtp) return;
+
+    setIsResendingOtp(true);
+    try {
+      const response = await fetch(`${API_BASE}/api/auth/resend-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        },
+        body: JSON.stringify({
+          session_id: otpSessionId,
+          username: otpUsername
+        })
+      });
+
+      const responseText = await response.text();
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        throw new Error('Respons resend OTP bukan JSON. Pastikan endpoint benar (api/auth/resend-otp).');
+      }
+
+      if (!response.ok) {
+        // 429 = masih dalam masa jeda; sinkronkan cooldown dengan backend
+        if (response.status === 429 && data.retry_after) {
+          setResendCooldown(data.retry_after);
+        }
+        throw new Error(data.message || 'Gagal mengirim ulang kode OTP.');
+      }
+
+      setOtpValues(['', '', '', '', '', '']);
+      document.getElementById('otp-input-0')?.focus();
+      setResendCooldown(30);
+      setAlert({
+        type: 'info',
+        message: data.message || 'Kode OTP baru telah dikirim ke email Anda.'
+      });
+    } catch (error) {
+      setAlert({
+        type: 'error',
+        message: error.message
+      });
+    } finally {
+      setIsResendingOtp(false);
     }
   };
 
@@ -515,6 +579,40 @@ const Login = ({ onLoginSuccess }) => {
                 )}
               </button>
 
+              {/* KIRIM ULANG KODE OTP */}
+              <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  disabled={resendCooldown > 0 || isResendingOtp}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: resendCooldown > 0 ? '#94a3b8' : '#16a385',
+                    cursor: resendCooldown > 0 || isResendingOtp ? 'not-allowed' : 'pointer',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  {isResendingOtp ? (
+                    <>
+                      <i className="fa-solid fa-spinner fa-spin"></i> Mengirim ulang...
+                    </>
+                  ) : resendCooldown > 0 ? (
+                    <>
+                      <i className="fa-regular fa-clock"></i> Kirim ulang kode ({resendCooldown}s)
+                    </>
+                  ) : (
+                    <>
+                      <i className="fa-solid fa-rotate-right"></i> Kirim ulang kode OTP
+                    </>
+                  )}
+                </button>
+              </div>
+
               {/* KEMBALI KE FORM LOGIN */}
               <div style={{ textAlign: 'center', marginTop: '20px' }}>
                 <button
@@ -522,6 +620,7 @@ const Login = ({ onLoginSuccess }) => {
                   onClick={() => {
                     setIsOtpStep(false);
                     setOtpValues(['', '', '', '', '', '']);
+                    setResendCooldown(0);
                     setAlert(null);
                     fetchCaptcha();
                   }}
