@@ -34,12 +34,12 @@ const Login = ({ onLoginSuccess }) => {
         method: 'GET',
         headers: {
           Accept: 'application/json'
-        }
+        },
+        credentials: 'include'   // <-- TAMBAHKAN
       });
 
       const responseText = await response.text();
       
-      // Cek apakah response adalah JSON
       let data;
       try {
         data = JSON.parse(responseText);
@@ -122,12 +122,12 @@ const Login = ({ onLoginSuccess }) => {
           password: formData.password,
           captcha_id: captcha.id,
           captcha_answer: formData.captchaAnswer
-        })
+        }),
+        credentials: 'include'   // <-- TAMBAHKAN
       });
 
       const responseText = await response.text();
       
-      // Cek apakah response adalah JSON
       let data;
       try {
         data = JSON.parse(responseText);
@@ -142,7 +142,6 @@ const Login = ({ onLoginSuccess }) => {
       // Jika backend meminta verifikasi OTP (requires_otp: true)
       if (data.data && data.data.requires_otp && data.data.session_id) {
         setOtpSessionId(data.data.session_id);
-        // Username diperlukan backend saat verify-otp, ambil dari payload user
         setOtpUsername(
           (data.data.user && data.data.user.username) || formData.username
         );
@@ -213,7 +212,8 @@ const Login = ({ onLoginSuccess }) => {
         body: JSON.stringify({
           session_id: otpSessionId,
           username: otpUsername
-        })
+        }),
+        credentials: 'include'   // <-- TAMBAHKAN
       });
 
       const responseText = await response.text();
@@ -226,7 +226,6 @@ const Login = ({ onLoginSuccess }) => {
       }
 
       if (!response.ok) {
-        // 429 = masih dalam masa jeda; sinkronkan cooldown dengan backend
         if (response.status === 429 && data.retry_after) {
           setResendCooldown(data.retry_after);
         }
@@ -272,18 +271,16 @@ const Login = ({ onLoginSuccess }) => {
           'Content-Type': 'application/json',
           Accept: 'application/json'
         },
-        // Backend (AuthController::verifyOtp) mengharapkan persis field ini:
-        // session_id, username, otp
         body: JSON.stringify({
           session_id: otpSessionId,
           username: otpUsername,
           otp: otpCode
-        })
+        }),
+        credentials: 'include'   // <-- TAMBAHKAN
       });
 
       const responseText = await response.text();
       
-      // Cek apakah response adalah JSON
       let data;
       try {
         data = JSON.parse(responseText);
@@ -295,7 +292,6 @@ const Login = ({ onLoginSuccess }) => {
         throw new Error(data.message || 'Verifikasi OTP gagal. Silakan coba lagi.');
       }
 
-      // Verifikasi sukses -> backend mengembalikan refresh_token (bukan "token")
       if (!data.data || !data.data.refresh_token) {
         throw new Error('Token sesi tidak diterima dari server.');
       }
@@ -305,7 +301,6 @@ const Login = ({ onLoginSuccess }) => {
         message: data.message || 'Verifikasi berhasil! Mengalihkan ke dashboard...'
       });
 
-      // Pindah ke Dashboard Utama lewat state App.jsx (SPA, tanpa reload/route "/dashboard")
       onLoginSuccess?.(data.data.refresh_token);
     } catch (error) {
       setAlert({
