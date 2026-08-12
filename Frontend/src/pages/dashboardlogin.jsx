@@ -5,7 +5,7 @@ import bgLogin from '../assets/gambar/background_login.jpeg';
 // Base URL backend Laravel, diambil dari .env (VITE_API_BASE_URL).
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://192.168.4.22:8000';
 
-const Login = () => {
+const Login = ({ onLoginSuccess }) => {
   // State untuk menyimpan input user
   const [formData, setFormData] = useState({
     username: '',
@@ -23,7 +23,7 @@ const Login = () => {
   const [isOtpStep, setIsOtpStep] = useState(false);
   const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
   const [otpSessionId, setOtpSessionId] = useState('');
-  const [username, setUsername] = useState(''); // <-- TAMBAHKAN state username
+  const [otpUsername, setOtpUsername] = useState('');
 
   // Fungsi mengambil captcha dari API Backend
   const fetchCaptcha = async () => {
@@ -32,12 +32,12 @@ const Login = () => {
         method: 'GET',
         headers: {
           Accept: 'application/json'
-        },
-        credentials: 'include'
+        }
       });
 
       const responseText = await response.text();
       
+      // Cek apakah response adalah JSON
       let data;
       try {
         data = JSON.parse(responseText);
@@ -120,12 +120,12 @@ const Login = () => {
           password: formData.password,
           captcha_id: captcha.id,
           captcha_answer: formData.captchaAnswer
-        }),
-        credentials: 'include'
+        })
       });
 
       const responseText = await response.text();
       
+      // Cek apakah response adalah JSON
       let data;
       try {
         data = JSON.parse(responseText);
@@ -137,17 +137,23 @@ const Login = () => {
         throw new Error(data.message || 'Login gagal. Silakan coba lagi.');
       }
 
-      // Jika backend mengembalikan session_id OTP
-      if (data.data && (data.data.session_id || data.data.otp_session_id)) {
-        setOtpSessionId(data.data.session_id || data.data.otp_session_id);
-        setUsername(formData.username); // <-- SIMPAN USERNAME
+      // Jika backend meminta verifikasi OTP (requires_otp: true)
+      if (data.data && data.data.requires_otp && data.data.session_id) {
+        setOtpSessionId(data.data.session_id);
+        // Username diperlukan backend saat verify-otp, ambil dari payload user
+        setOtpUsername(
+          (data.data.user && data.data.user.username) || formData.username
+        );
         setIsOtpStep(true);
         setAlert({
           type: 'info',
-          message: data.message || 'Kode OTP telah dikirimkan ke perangkat Anda. Silakan masukkan di bawah.'
+          message: data.message || 'Kode OTP telah dikirimkan ke email Anda. Silakan masukkan di bawah.'
         });
+      } else if (data.data && data.data.refresh_token) {
+        // Backend langsung memberi sesi aktif tanpa OTP
+        onLoginSuccess?.(data.data.refresh_token);
       } else {
-        throw new Error('Tidak menerima session ID OTP dari server.');
+        throw new Error('Respons login tidak dikenali dari server.');
       }
     } catch (error) {
       setAlert({
@@ -202,16 +208,18 @@ const Login = () => {
           'Content-Type': 'application/json',
           Accept: 'application/json'
         },
+        // Backend (AuthController::verifyOtp) mengharapkan persis field ini:
+        // session_id, username, otp
         body: JSON.stringify({
           session_id: otpSessionId,
-          username: username,          // <-- KIRIM USERNAME
-          otp: otpCode                 // <-- KIRIM OTP (bukan otp_code)
-        }),
-        credentials: 'include'
+          username: otpUsername,
+          otp: otpCode
+        })
       });
 
       const responseText = await response.text();
       
+      // Cek apakah response adalah JSON
       let data;
       try {
         data = JSON.parse(responseText);
@@ -223,16 +231,18 @@ const Login = () => {
         throw new Error(data.message || 'Verifikasi OTP gagal. Silakan coba lagi.');
       }
 
-      // Jika verifikasi sukses, alihkan ke dashboard atau simpan token
+      // Verifikasi sukses -> backend mengembalikan refresh_token (bukan "token")
+      if (!data.data || !data.data.refresh_token) {
+        throw new Error('Token sesi tidak diterima dari server.');
+      }
+
       setAlert({
         type: 'info',
         message: data.message || 'Verifikasi berhasil! Mengalihkan ke dashboard...'
       });
 
-      if (data.data && data.data.token) {
-        localStorage.setItem('auth_token', data.data.token);
-        window.location.href = '/dashboard';
-      }
+      // Pindah ke Dashboard Utama lewat state App.jsx (SPA, tanpa reload/route "/dashboard")
+      onLoginSuccess?.(data.data.refresh_token);
     } catch (error) {
       setAlert({
         type: 'error',
