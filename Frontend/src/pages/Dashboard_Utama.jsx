@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../assets/style/Dashboard_Utama.css';
 
-// Base URL backend Laravel — harus sama dengan yang dipakai dashboardlogin.jsx
-// (VITE_API_BASE_URL). Sebelumnya file ini masih hardcode ke backend
-// Node.js lama (http://localhost:3000/auth/validate), sehingga saat sudah
-// pindah ke backend Laravel, fetch /auth/validate selalu gagal dan modul
-// (app-card SIMRS, AMINO Mobile, LAPOR AMINO, WBS) tidak pernah tampil.
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://192.168.4.22:8000';
 
 const Dashboard = ({ onLogout }) => {
@@ -17,21 +12,19 @@ const Dashboard = ({ onLogout }) => {
 
   const dropdownRef = useRef(null);
 
-  // Icon bawaan Font Awesome
+  // Map gaya icon dan aksen warna per modul
   const moduleStyles = {
-    SIMRS: { icon: 'fa-solid fa-hospital' },
-    AMINO_MOBILE: { icon: 'fa-solid fa-mobile-screen' },
-    LAPOR_AMINO: { icon: 'fa-solid fa-bullhorn' },
-    WBS: { icon: 'fa-solid fa-shield-halved' },
+    SIMRS: { icon: 'fa-solid fa-hospital', color: '#0284c7', bg: '#e0f2fe', tag: 'Internal' },
+    AMINO_MOBILE: { icon: 'fa-solid fa-mobile-screen-button', color: '#16a34a', bg: '#dcfce7', tag: 'Mobile' },
+    LAPOR_AMINO: { icon: 'fa-solid fa-bullhorn', color: '#ea580c', bg: '#ffedd5', tag: 'Layanan' },
+    WBS: { icon: 'fa-solid fa-shield-halved', color: '#9333ea', bg: '#f3e8ff', tag: 'Keamanan' },
   };
-  const defaultStyle = { icon: 'fa-solid fa-grip' };
+  const defaultStyle = { icon: 'fa-solid fa-cubes', color: '#0d9488', bg: '#ccfbf1', tag: 'Portal' };
 
-  // Validasi Sesi & Fetch Data
   useEffect(() => {
     const validateSession = async () => {
       const token = localStorage.getItem('sso_token');
 
-      // Jika tidak ada token, panggil logout
       if (!token) {
         if (onLogout) onLogout();
         setIsLoading(false);
@@ -59,7 +52,6 @@ const Dashboard = ({ onLogout }) => {
         }
       } catch (error) {
         console.error('Gagal memvalidasi sesi:', error);
-        // Tetap tampilkan dashboard dengan array kosong jika API backend mati/error
       } finally {
         setIsLoading(false);
       }
@@ -68,7 +60,6 @@ const Dashboard = ({ onLogout }) => {
     validateSession();
   }, [onLogout]);
 
-  // Handle Klik di luar Dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -93,20 +84,30 @@ const Dashboard = ({ onLogout }) => {
 
   if (isLoading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#16a385', fontFamily: 'Inter, sans-serif' }}>
-        <p>Loading...</p>
+      <div className="loader-container">
+        <div className="spinner"></div>
+        <p>Memuat Sesi SSO Portal...</p>
       </div>
     );
   }
 
   return (
-    <div className="dashboard-page" style={{ minHeight: '100vh', backgroundColor: '#f4f7f6' }}>
+    <div className="dashboard-page">
       {/* TOPBAR */}
-      <div className="topbar">
-        <div className="topbar-title">RSJD dr. Amino Gondohutomo</div>
+      <header className="topbar">
+        <div className="topbar-brand">
+          <div className="brand-icon">
+            <i className="fa-solid fa-hospital-user"></i>
+          </div>
+          <div className="brand-text">
+            <h2>RSJD dr. Amino Gondohutomo</h2>
+            <span>Single Sign-On Portal System</span>
+          </div>
+        </div>
+
         <div className="topbar-right">
-          <div className="topbar-tab">
-            <i className="fa-solid fa-th-large"></i> Apps
+          <div className="status-badge">
+            <span className="dot-online"></span> System Normal
           </div>
 
           <div className="user-menu" ref={dropdownRef}>
@@ -114,68 +115,108 @@ const Dashboard = ({ onLogout }) => {
               className="user-menu-btn"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
-              <span className="user-avatar">{initial}</span>
-              {username}
-              <i className="fa-solid fa-caret-down"></i>
+              <div className="user-avatar">{initial}</div>
+              <span className="user-name">{username}</span>
+              <i className="fa-solid fa-chevron-down caret-icon"></i>
             </button>
 
             <div className={`user-dropdown ${isDropdownOpen ? 'open' : ''}`}>
-              <div className="user-dropdown-name">{username}</div>
-              <button type="button" onClick={() => handleLogout('logout')}>
-                <i className="fa-solid fa-right-from-bracket"></i> Logout
+              <div className="user-dropdown-header">
+                <p className="dropdown-label">Signed in as</p>
+                <p className="dropdown-username">{username}</p>
+              </div>
+              <button type="button" className="logout-btn" onClick={() => handleLogout('logout')}>
+                <i className="fa-solid fa-arrow-right-from-bracket"></i> Logout Sesi
               </button>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* CONTENT */}
-      <div className="content">
-        <div className="content-header">
-          <h1>Portal Aplikasi</h1>
-          <div className="search-box">
-            <i className="fa-solid fa-search"></i>
-            <input
-              type="text"
-              placeholder="Search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              autoComplete="off"
-            />
+      {/* MAIN CONTAINER */}
+      <main className="dashboard-container">
+        {/* WELCOME BANNER */}
+        <section className="welcome-banner">
+          <div className="banner-content">
+            <h1>Selamat Datang Kembali, <span>{username}</span>!</h1>
+            <p>Akses seluruh modul operasional dan layanan internal rumah sakit dalam satu pintu SSO.</p>
           </div>
-        </div>
+          <div className="banner-stats">
+            <div className="stat-card">
+              <span className="stat-number">{modules.length}</span>
+              <span className="stat-label">Aplikasi Aktif</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-number">24/7</span>
+              <span className="stat-label">Layanan SSO</span>
+            </div>
+          </div>
+        </section>
 
-        {/* APPS GRID */}
-        <div className="apps-grid">
-          {filteredModules.length === 0 ? (
-            <p className="empty-state">Belum ada aplikasi yang dapat diakses.</p>
-          ) : (
-            filteredModules.map((module, index) => {
-              const code = module.code || '';
-              const name = module.name || code || 'Module';
-              const url = module.url || '#';
-              const style = moduleStyles[code] || defaultStyle;
-              const description = module.description || 'Layanan sistem informasi dan portal internal.';
+        {/* SECTION HEADER & SEARCH */}
+        <section className="portal-section">
+          <div className="content-header">
+            <div>
+              <h3>Daftar Modul Aplikasi</h3>
+              <p className="sub-title">Pilih modul untuk membuka layanan terintegrasi</p>
+            </div>
 
-              return (
-                <a
-                  key={index}
-                  className="app-card"
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <div className="card-icon">
-                    <i className={style.icon}></i>
-                  </div>
-                  <h3 className="card-title">{name}</h3>
-                  <p className="card-desc">{description}</p>
-                </a>
-              );
-            })
-          )}
-        </div>
-      </div>
+            <div className="search-box">
+              <i className="fa-solid fa-magnifying-glass"></i>
+              <input
+                type="text"
+                placeholder="Cari aplikasi..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                autoComplete="off"
+              />
+            </div>
+          </div>
+
+          {/* APPS GRID */}
+          <div className="apps-grid">
+            {filteredModules.length === 0 ? (
+              <div className="empty-state">
+                <i className="fa-solid fa-folder-open"></i>
+                <p>Tidak ada modul yang ditemukan.</p>
+              </div>
+            ) : (
+              filteredModules.map((module, index) => {
+                const code = module.code || '';
+                const name = module.name || code || 'Module';
+                const url = module.url || '#';
+                const style = moduleStyles[code] || defaultStyle;
+                const description = module.description || 'Sistem informasi operasional dan portal internal RSJD.';
+
+                return (
+                  <a
+                    key={index}
+                    className="app-card"
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <div className="card-top">
+                      <div className="card-icon" style={{ color: style.color, backgroundColor: style.bg }}>
+                        <i className={style.icon}></i>
+                      </div>
+                      <span className="card-tag">{style.tag}</span>
+                    </div>
+                    <div className="card-body">
+                      <h4 className="card-title">{name}</h4>
+                      <p className="card-desc">{description}</p>
+                    </div>
+                    <div className="card-footer">
+                      <span>Buka Aplikasi</span>
+                      <i className="fa-solid fa-arrow-up-right-from-square"></i>
+                    </div>
+                  </a>
+                );
+              })
+            )}
+          </div>
+        </section>
+      </main>
     </div>
   );
 };
