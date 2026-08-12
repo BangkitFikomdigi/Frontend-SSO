@@ -12,14 +12,30 @@ const Dashboard = ({ onLogout }) => {
 
   const dropdownRef = useRef(null);
 
-  // Map gaya icon dan aksen warna per modul
+  // Map gaya icon, aksen warna, dan deskripsi per modul
   const moduleStyles = {
-    SIMRS: { icon: 'fa-solid fa-hospital', color: '#0284c7', bg: '#e0f2fe', tag: 'Internal' },
-    AMINO_MOBILE: { icon: 'fa-solid fa-mobile-screen-button', color: '#16a34a', bg: '#dcfce7', tag: 'Mobile' },
-    LAPOR_AMINO: { icon: 'fa-solid fa-bullhorn', color: '#ea580c', bg: '#ffedd5', tag: 'Layanan' },
-    WBS: { icon: 'fa-solid fa-shield-halved', color: '#9333ea', bg: '#f3e8ff', tag: 'Keamanan' },
+    SIMRS: { 
+      icon: 'fa-solid fa-hospital', color: '#0284c7', bg: '#e0f2fe', tag: 'Internal',
+      desc: 'Sistem informasi terintegrasi untuk manajemen rekam medis dan administrasi rumah sakit.'
+    },
+    AMINO_MOBILE: { 
+      icon: 'fa-solid fa-mobile-screen-button', color: '#16a34a', bg: '#dcfce7', tag: 'Mobile',
+      desc: 'Aplikasi layanan mandiri untuk kemudahan pendaftaran online dan akses informasi pasien.'
+    },
+    LAPOR_AMINO: { 
+      icon: 'fa-solid fa-bullhorn', color: '#ea580c', bg: '#ffedd5', tag: 'Layanan',
+      desc: 'Platform terpadu untuk penyampaian saran, kritik, dan pengaduan layanan masyarakat.'
+    },
+    WBS: { 
+      icon: 'fa-solid fa-shield-halved', color: '#9333ea', bg: '#f3e8ff', tag: 'Keamanan',
+      desc: 'Whistleblowing System untuk pelaporan indikasi pelanggaran secara rahasia dan aman.'
+    },
   };
-  const defaultStyle = { icon: 'fa-solid fa-cubes', color: '#0d9488', bg: '#ccfbf1', tag: 'Portal' };
+  
+  const defaultStyle = { 
+    icon: 'fa-solid fa-cubes', color: '#0d9488', bg: '#ccfbf1', tag: 'Portal',
+    desc: 'Layanan sistem informasi dan portal operasional internal.'
+  };
 
   useEffect(() => {
     const validateSession = async () => {
@@ -186,7 +202,9 @@ const Dashboard = ({ onLogout }) => {
                 const name = module.name || code || 'Module';
                 const url = module.url || '#';
                 const style = moduleStyles[code] || defaultStyle;
-                const description = module.description || 'Sistem informasi operasional dan portal internal RSJD.';
+                
+                // Menerapkan prioritas: deskripsi dari API -> deskripsi dari style yang sudah dibuat -> default
+                const description = module.description || style.desc;
 
                 return (
                   <a
