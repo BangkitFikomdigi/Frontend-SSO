@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../assets/style/Dashboard_Utama.css';
 
+// Base URL backend Laravel — harus sama dengan yang dipakai dashboardlogin.jsx
+// (VITE_API_BASE_URL). Sebelumnya file ini masih hardcode ke backend
+// Node.js lama (http://localhost:3000/auth/validate), sehingga saat sudah
+// pindah ke backend Laravel, fetch /auth/validate selalu gagal dan modul
+// (app-card SIMRS, AMINO Mobile, LAPOR AMINO, WBS) tidak pernah tampil.
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://192.168.4.22:8000';
+
 const Dashboard = ({ onLogout }) => {
   const [username, setUsername] = useState('User');
   const [modules, setModules] = useState([]);
@@ -32,7 +39,7 @@ const Dashboard = ({ onLogout }) => {
       }
 
       try {
-        const response = await fetch('http://localhost:3000/auth/validate', {
+        const response = await fetch(`${API_BASE}/api/auth/validate`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
