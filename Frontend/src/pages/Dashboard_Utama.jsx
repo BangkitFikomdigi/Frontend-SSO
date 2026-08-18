@@ -1,12 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../assets/style/Dashboard_Utama.css';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://192.168.4.22:8000';
-
-const Dashboard = ({ onLogout }) => {
-  const [username, setUsername] = useState('User');
-  const [modules, setModules] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+const Dashboard = ({ username = 'User', modules = [], onLogout }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -14,67 +9,28 @@ const Dashboard = ({ onLogout }) => {
 
   // Map gaya icon, aksen warna, dan deskripsi per modul
   const moduleStyles = {
-    SIMRS: { 
+    SIMRS: {
       icon: 'fa-solid fa-hospital', color: '#0284c7', bg: '#e0f2fe', tag: 'Internal',
       desc: 'Sistem informasi terintegrasi untuk manajemen rekam medis dan administrasi rumah sakit.'
     },
-    AMINO_MOBILE: { 
+    AMINO_MOBILE: {
       icon: 'fa-solid fa-mobile-screen-button', color: '#16a34a', bg: '#dcfce7', tag: 'Mobile',
       desc: 'Aplikasi layanan mandiri untuk kemudahan pendaftaran online dan akses informasi pasien.'
     },
-    LAPOR_AMINO: { 
+    LAPOR_AMINO: {
       icon: 'fa-solid fa-bullhorn', color: '#ea580c', bg: '#ffedd5', tag: 'Layanan',
       desc: 'Platform terpadu untuk penyampaian saran, kritik, dan pengaduan layanan masyarakat.'
     },
-    WBS: { 
+    WBS: {
       icon: 'fa-solid fa-shield-halved', color: '#9333ea', bg: '#f3e8ff', tag: 'Keamanan',
       desc: 'Whistleblowing System untuk pelaporan indikasi pelanggaran secara rahasia dan aman.'
     },
   };
-  
-  const defaultStyle = { 
+
+  const defaultStyle = {
     icon: 'fa-solid fa-cubes', color: '#0d9488', bg: '#ccfbf1', tag: 'Portal',
     desc: 'Layanan sistem informasi dan portal operasional internal.'
   };
-
-  useEffect(() => {
-    const validateSession = async () => {
-      const token = localStorage.getItem('sso_token');
-
-      if (!token) {
-        if (onLogout) onLogout();
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch(`${API_BASE}/api/auth/validate`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({})
-        });
-
-        const sessionData = await response.json();
-
-        if (sessionData && sessionData.success && sessionData.valid) {
-          setModules(sessionData.data?.user?.modul_akses || []);
-          setUsername(sessionData.data?.user?.username || 'User');
-        } else {
-          if (onLogout) onLogout('expired');
-        }
-      } catch (error) {
-        console.error('Gagal memvalidasi sesi:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    validateSession();
-  }, [onLogout]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -86,9 +42,8 @@ const Dashboard = ({ onLogout }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = (reason = '') => {
-    localStorage.removeItem('sso_token');
-    if (onLogout) onLogout(reason);
+  const handleLogout = () => {
+    if (onLogout) onLogout();
   };
 
   const filteredModules = modules.filter((module) => {
@@ -97,15 +52,6 @@ const Dashboard = ({ onLogout }) => {
   });
 
   const initial = username ? username.charAt(0).toUpperCase() : 'U';
-
-  if (isLoading) {
-    return (
-      <div className="loader-container">
-        <div className="spinner"></div>
-        <p>Memuat Sesi SSO Portal...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="dashboard-page">
@@ -141,7 +87,7 @@ const Dashboard = ({ onLogout }) => {
                 <p className="dropdown-label">Signed in as</p>
                 <p className="dropdown-username">{username}</p>
               </div>
-              <button type="button" className="logout-btn" onClick={() => handleLogout('logout')}>
+              <button type="button" className="logout-btn" onClick={handleLogout}>
                 <i className="fa-solid fa-arrow-right-from-bracket"></i> Logout Sesi
               </button>
             </div>
@@ -202,8 +148,8 @@ const Dashboard = ({ onLogout }) => {
                 const name = module.name || code || 'Module';
                 const url = module.url || '#';
                 const style = moduleStyles[code] || defaultStyle;
-                
-                // Menerapkan prioritas: deskripsi dari API -> deskripsi dari style yang sudah dibuat -> default
+
+                // Prioritas: deskripsi dari API -> deskripsi dari style bawaan -> default
                 const description = module.description || style.desc;
 
                 return (
