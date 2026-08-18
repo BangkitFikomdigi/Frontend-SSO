@@ -12,6 +12,36 @@ function App() {
   const [authStatus, setAuthStatus] = useState('checking');
   const [sessionUser, setSessionUser] = useState(null); // { username, modules }
 
+  // Coba perpanjang sesi diam-diam pakai refresh_token yang sama, TANPA
+  // password/OTP. Ini yang membedakan "sesi timeout karena idle" dengan
+  // "user pencet logout": timeout tidak menghapus refresh_token di server,
+  // logout eksplisit yang menghapusnya (lihat AuthController::logout).
+  const attemptRefresh = useCallback(async (token) => {
+    try {
+      const response = await fetch(`${API_BASE}/api/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        },
+        body: JSON.stringify({ refresh_token: token })
+      });
+
+      const data = await response.json();
+
+      if (data && data.success && data.data) {
+        return {
+          username: data.data.user?.username || 'User',
+          modules: data.data.user?.modul_akses || []
+        };
+      }
+    } catch (error) {
+      console.error('Gagal memperpanjang sesi:', error);
+    }
+
+    return null;
+  }, []);
+
   // Validasi token ke backend. Dipakai saat pertama buka app & setelah login sukses.
   const validateSession = useCallback(async () => {
     const token = localStorage.getItem('sso_token');
@@ -41,24 +71,50 @@ function App() {
           modules: data.data?.user?.modul_akses || []
         });
         setAuthStatus('auth');
-      } else {
-        // Token ada tapi tidak valid lagi -> anggap sesi habis, wajib login+OTP ulang
-        localStorage.removeItem('sso_token');
-        setSessionUser(null);
-        setAuthStatus('guest');
+        return;
       }
     } catch (error) {
       console.error('Gagal memvalidasi sesi SSO:', error);
-      localStorage.removeItem('sso_token');
-      setSessionUser(null);
-      setAuthStatus('guest');
     }
-  }, []);
+
+    // Token tidak valid/expired lewat /validate -> JANGAN langsung anggap
+    // logout. Coba dulu perpanjang diam-diam lewat /refresh (ini yang akan
+    // berhasil kalau penyebabnya cuma timeout inaktivitas, dan akan gagal
+    // kalau memang sudah logout eksplisit atau refresh_token sudah lewat 7 hari).
+    const refreshed = await attemptRefresh(token);
+
+    if (refreshed) {
+      setSessionUser(refreshed);
+      setAuthStatus('auth');
+      return;
+    }
+
+    // Refresh juga gagal -> baru benar-benar dianggap sesi habis, wajib login+OTP ulang
+    localStorage.removeItem('sso_token');
+    setSessionUser(null);
+    setAuthStatus('guest');
+  }, [attemptRefresh]);
 
   // Jalankan sekali saat aplikasi pertama kali dibuka
   useEffect(() => {
     validateSession();
   }, [validateSession]);
+
+  // Selagi tab masih terbuka & user masih login, perpanjang sesi tiap 5
+  // menit di background - supaya sesi tidak sempat timeout duluan padahal
+  // user masih aktif memakai aplikasi.
+  useEffect(() => {
+    if (authStatus !== 'auth') return undefined;
+
+    const token = localStorage.getItem('sso_token');
+    if (!token) return undefined;
+
+    const interval = setInterval(() => {
+      attemptRefresh(token);
+    }, 5 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, [authStatus, attemptRefresh]);
 
   // Callback setelah sukses login & verifikasi OTP
   const handleLoginSuccess = async (token) => {
@@ -68,7 +124,29 @@ function App() {
   };
 
   // Callback saat user logout
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const token = localStorage.getItem('sso_token');
+
+    // Beritahu backend supaya session & refresh token ini di-nonaktifkan
+    // di server (bukan cuma dihapus dari localStorage). Kalau gagal
+    // (mis. server tidak bisa dihubungi), tetap lanjut logout di sisi
+    // client - jangan sampai user "terjebak" tidak bisa logout.
+    if (token) {
+      try {
+        await fetch(`${API_BASE}/api/auth/logout`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({})
+        });
+      } catch (error) {
+        console.error('Gagal memberi tahu server saat logout:', error);
+      }
+    }
+
     localStorage.removeItem('sso_token');
     setSessionUser(null);
     setAuthStatus('guest');
