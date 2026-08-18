@@ -373,7 +373,7 @@ const Login = ({ onLoginSuccess }) => {
 
           <div className="footer-left">
             <p>
-              &copy; 2026 RSJD Amino Hospital - Divisi Teknologi Informasi
+              &copy; 2026 RSJD Amino Hospital - Informatika 2024
             </p>
           </div>
         </div>
@@ -649,7 +649,7 @@ const Login = ({ onLoginSuccess }) => {
           {/* ================= SUPPORT ================= */}
           <div className="support-info">
             <p>
-              Kendala login? Hubungi <strong>IT Support ext. 1123</strong>
+              Kendala login? Hubungi <strong>admin MDSI</strong>
             </p>
           </div>
         </div>
