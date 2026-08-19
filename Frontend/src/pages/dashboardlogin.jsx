@@ -354,13 +354,13 @@ const Login = ({ onLoginSuccess }) => {
 
             <div className="feature-card">
               <i className="fa-solid fa-heart-circle-check"></i>
-              <h3>AMINO_MOBILE</h3>
+              <h3>AMINO MOBILE</h3>
               <p>Layanan mobile untuk staf dan pasien.</p>
             </div>
 
             <div className="feature-card">
               <i className="fa-solid fa-capsules"></i>
-              <h3>LAPOR_AMINO</h3>
+              <h3>LAPOR AMINO</h3>
               <p>Kanal pelaporan dan pengaduan internal.</p>
             </div>
 

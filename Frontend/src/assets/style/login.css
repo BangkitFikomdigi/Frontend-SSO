@@ -1,655 +1,2007 @@
 /* ==========================================================================
-   SSO PORTAL - RSJD AMINO HOSPITAL
-   Shared stylesheet for index.php & login.php
+   RSJD AMINO HOSPITAL
+   MODERN SINGLE SIGN-ON LOGIN
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+
+/* ==========================================================================
+   1. ROOT / VARIABLES
    ========================================================================== */
 
-/* ---------- Reset & Base ---------- */
+:root {
+    --primary: #0f766e;
+    --primary-light: #14b8a6;
+    --primary-dark: #115e59;
+
+    --primary-soft: #ccfbf1;
+
+    --text: #0f172a;
+    --text-soft: #475569;
+    --muted: #94a3b8;
+
+    --border: #e2e8f0;
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+
+    --danger: #dc2626;
+    --danger-bg: #fef2f2;
+
+    --info: #0284c7;
+    --info-bg: #f0f9ff;
+
+    --success: #16a34a;
+
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+
+    --shadow-sm:
+        0 4px 12px rgba(15, 23, 42, 0.04);
+
+    --shadow-md:
+        0 16px 45px rgba(15, 23, 42, 0.08),
+        0 4px 14px rgba(15, 23, 42, 0.04);
+
+    --shadow-lg:
+        0 30px 80px rgba(15, 23, 42, 0.14),
+        0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+
+/* ==========================================================================
+   2. RESET
+   ========================================================================== */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
 }
 
-html, body {
-    height: 100%;
-    background-color: #f1f5f9;
+html,
+body,
+#root {
+    width: 100%;
+    min-height: 100%;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100dvh;
+
+    background: #f8fafc;
+
+    color: var(--text);
+
+    font-family: 'Inter', sans-serif;
+
     overflow-x: hidden;
 }
 
-/* ---------- Split Container ---------- */
-.container {
-    display: flex;
-    min-height: 100vh;
-    width: 100%;
+button,
+input {
+    font-family: inherit;
 }
+
 
 /* ==========================================================================
-   LEFT PANEL (Branding & Info)
+   3. MAIN CONTAINER
    ========================================================================== */
-.left-panel {
-    flex: 1 1 50%;
+
+.container {
     position: relative;
-    display: flex;
-    align-items: stretch;
-    /* Hapus baris background-image di sini */
-    background-size: cover;
-    background-position: center;
-    color: #ffffff;
+
+    width: 100%;
+    min-height: 100dvh;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1.08fr)
+        minmax(460px, 0.92fr);
+
+    background: #f8fafc;
 }
 
-/* Gradient teal overlay */
+
+/* ==========================================================================
+   4. LEFT PANEL
+   ========================================================================== */
+
+.left-panel {
+    position: sticky;
+    top: 0;
+
+    width: 100%;
+    height: 100dvh;
+    min-height: 100dvh;
+
+    overflow: hidden;
+
+    display: flex;
+
+    color: #ffffff;
+
+    background-size: cover;
+    background-position: center;
+
+    isolation: isolate;
+}
+
+
+/* ==========================================================================
+   5. LEFT OVERLAY
+   ========================================================================== */
+
 .overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-        135deg,
-        rgba(11, 92, 79, 0.92) 0%,
-        rgba(22, 163, 132, 0.85) 55%,
-        rgba(16, 140, 114, 0.78) 100%
-    );
-    z-index: 1;
+
+    z-index: -2;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(6, 52, 47, 0.96) 0%,
+            rgba(8, 87, 78, 0.90) 42%,
+            rgba(13, 148, 136, 0.78) 100%
+        );
 }
+
+
+/* ==========================================================================
+   6. LEFT DECORATION
+   ========================================================================== */
+
+.left-panel::before,
+.left-panel::after {
+    content: '';
+
+    position: absolute;
+
+    border-radius: 50%;
+
+    pointer-events: none;
+
+    z-index: -1;
+
+    filter: blur(2px);
+}
+
+.left-panel::before {
+    width: 420px;
+    height: 420px;
+
+    top: -180px;
+    right: -150px;
+
+    background: rgba(45, 212, 191, 0.20);
+}
+
+.left-panel::after {
+    width: 320px;
+    height: 320px;
+
+    bottom: -150px;
+    left: -130px;
+
+    background: rgba(255, 255, 255, 0.09);
+}
+
+
+/* ==========================================================================
+   7. LEFT GRID EFFECT
+   ========================================================================== */
 
 .content-wrapper {
     position: relative;
     z-index: 2;
+
+    width: 100%;
+    height: 100%;
+    min-height: 100dvh;
+
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    width: 100%;
-    padding: 48px 56px;
-    animation: fadeSlideIn 0.7s ease both;
+
+    padding:
+        46px
+        clamp(36px, 5vw, 76px);
+
+    animation:
+        fadeSlideIn
+        0.8s
+        cubic-bezier(.22, 1, .36, 1)
+        both;
 }
 
-/* ---------- Brand ---------- */
+.content-wrapper::before {
+    content: '';
+
+    position: absolute;
+    inset: 0;
+
+    z-index: -1;
+
+    background-image:
+        linear-gradient(
+            rgba(255, 255, 255, 0.045) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.045) 1px,
+            transparent 1px
+        );
+
+    background-size: 44px 44px;
+
+    mask-image:
+        linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.7),
+            transparent 85%
+        );
+
+    pointer-events: none;
+}
+
+
+/* ==========================================================================
+   8. BRAND
+   ========================================================================== */
+
 .brand {
     display: flex;
     align-items: center;
+
     gap: 14px;
 }
 
 .logo-icon {
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    border: 2px solid rgba(255, 255, 255, 0.9);
-    border-radius: 50px;
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 19px;
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(4px);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.30);
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.22),
+            rgba(255, 255, 255, 0.08)
+        );
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.28),
+
+        0 12px 30px
+        rgba(0, 0, 0, 0.14);
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    font-size: 20px;
 }
 
 .brand-text h1 {
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 1.2px;
-    line-height: 1.3;
+    font-size: 14px;
+
+    line-height: 1.35;
+
+    font-weight: 800;
+
+    letter-spacing: 1.1px;
 }
 
 .brand-text p {
-    font-size: 12.5px;
-    font-weight: 400;
-    opacity: 0.85;
-    letter-spacing: 0.4px;
+    margin-top: 3px;
+
+    color:
+        rgba(255, 255, 255, 0.72);
+
+    font-size: 11.5px;
+
+    font-weight: 500;
+
+    letter-spacing: 0.35px;
 }
 
-/* ---------- Main Text ---------- */
+
+/* ==========================================================================
+   9. LEFT HERO TEXT
+   ========================================================================== */
+
 .main-text {
-    margin: 40px 0 32px;
+    max-width: 650px;
+
+    margin-top: auto;
+    margin-bottom: 34px;
+}
+
+.main-text::before {
+    content: 'SECURE SINGLE SIGN-ON';
+
+    display: inline-flex;
+    align-items: center;
+
+    height: 30px;
+
+    padding: 0 12px;
+
+    margin-bottom: 18px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.20);
+
+    border-radius: 999px;
+
+    background:
+        rgba(255, 255, 255, 0.08);
+
+    color: #ccfbf1;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.4px;
+
+    backdrop-filter: blur(10px);
 }
 
 .main-text h2 {
-    font-size: clamp(28px, 3.2vw, 42px);
-    line-height: 1.25;
-    font-weight: 700;
-    margin-bottom: 16px;
-    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+    max-width: 650px;
+
+    margin-bottom: 22px;
+
+    color: #ffffff;
+
+    font-size:
+        clamp(34px, 4vw, 58px);
+
+    line-height: 1.08;
+
+    font-weight: 800;
+
+    letter-spacing: -1.8px;
+
+    text-shadow:
+        0 4px 25px
+        rgba(0, 0, 0, 0.18);
 }
 
 .main-text p {
+    max-width: 540px;
+
+    color:
+        rgba(255, 255, 255, 0.80);
+
     font-size: 15px;
-    line-height: 1.65;
-    max-width: 470px;
-    opacity: 0.92;
+
+    line-height: 1.75;
+
+    font-weight: 400;
 }
 
-/* Styling Kotak Input OTP */
-.otp-box {
-    width: 44px;
-    height: 52px;
-    font-size: 22px;
-    font-weight: 700;
-    text-align: center;
-    border: 1.5px solid #cbd5e1;
-    border-radius: 8px;
-    outline: none;
-    transition: all 0.2s ease-in-out;
-    background-color: #f8fafc;
-    color: #0f172a;
-}
 
-.otp-box:focus {
-    border-color: #16a385;
-    background-color: #ffffff;
-    box-shadow: 0 0 0 3px rgba(22, 163, 133, 0.15);
-}
-/* ---------- Features Grid ---------- */
+/* ==========================================================================
+   10. FEATURE CARDS
+   ========================================================================== */
+
 .features-grid {
+    width: 100%;
+    max-width: 660px;
+
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
-    max-width: 520px;
-    margin-bottom: 28px;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+
+    margin-bottom: 30px;
 }
 
 .feature-card {
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    padding: 18px 20px;
-    border-radius: 5px;
-    backdrop-filter: blur(6px);
-    transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+    position: relative;
+
+    overflow: hidden;
+
+    min-height: 116px;
+
+    padding: 17px 18px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.15);
+
+    border-radius: 17px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.14),
+            rgba(255, 255, 255, 0.065)
+        );
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.10);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    transition:
+        transform 0.3s ease,
+        background 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.feature-card::after {
+    content: '';
+
+    position: absolute;
+
+    width: 90px;
+    height: 90px;
+
+    top: -45px;
+    right: -45px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255, 255, 255, 0.08);
 }
 
 .feature-card:hover {
-    background: rgba(255, 255, 255, 0.22);
-    border-color: rgba(255, 255, 255, 0.4);
-    transform: translateY(-4px);
+    transform: translateY(-5px);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.20),
+            rgba(255, 255, 255, 0.09)
+        );
+
+    border-color:
+        rgba(255, 255, 255, 0.30);
+
+    box-shadow:
+        0 15px 30px
+        rgba(0, 0, 0, 0.12);
 }
 
 .feature-card i {
-    font-size: 20px;
+    width: 34px;
+    height: 34px;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
     margin-bottom: 10px;
-    display: inline-block;
+
+    border-radius: 10px;
+
+    background:
+        rgba(167, 243, 208, 0.13);
+
     color: #a7f3d0;
+
+    font-size: 15px;
 }
 
 .feature-card h3 {
-    font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 4px;
+    font-size: 12.5px;
+
+    font-weight: 800;
+
     letter-spacing: 0.3px;
 }
 
 .feature-card p {
-    font-size: 12px;
+    margin-top: 4px;
+
+    color:
+        rgba(255, 255, 255, 0.65);
+
+    font-size: 10.5px;
+
     line-height: 1.5;
-    opacity: 0.82;
 }
 
-/* ---------- SSO Flow Steps (used on index.php) ---------- */
-.flow {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    max-width: 480px;
-    margin: 34px 0 26px;
-}
-
-.flow-step {
-    display: flex;
-    gap: 14px;
-    align-items: flex-start;
-    padding: 14px 18px;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    transition: background 0.25s ease, transform 0.25s ease;
-}
-
-.flow-step:hover {
-    background: rgba(255, 255, 255, 0.18);
-    transform: translateX(4px);
-}
-
-.flow-step.active {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.45);
-}
-
-.flow-dot {
-    width: 12px;
-    height: 12px;
-    min-width: 12px;
-    border-radius: 50%;
-    margin-top: 5px;
-    background: rgba(255, 255, 255, 0.35);
-    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12);
-}
-
-.flow-step.active .flow-dot {
-    background: #a7f3d0;
-    box-shadow: 0 0 0 4px rgba(167, 243, 208, 0.25);
-}
-
-.flow-label {
-    font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 3px;
-}
-
-.flow-detail {
-    font-size: 12px;
-    line-height: 1.55;
-    opacity: 0.85;
-}
-
-/* ---------- Footer Left ---------- */
-.footer-left {
-    font-size: 12px;
-    opacity: 0.72;
-    padding-top: 18px;
-    border-top: 1px solid rgba(255, 255, 255, 0.18);
-}
 
 /* ==========================================================================
-   RIGHT PANEL (Login Form)
+   11. LEFT FOOTER
    ========================================================================== */
+
+.footer-left {
+    padding-top: 18px;
+
+    border-top:
+        1px solid
+        rgba(255, 255, 255, 0.13);
+
+    color:
+        rgba(255, 255, 255, 0.48);
+
+    font-size: 10.5px;
+
+    line-height: 1.5;
+}
+
+
+/* ==========================================================================
+   12. RIGHT PANEL
+   ========================================================================== */
+
 .right-panel {
-    flex: 1 1 50%;
+    position: relative;
+
+    z-index: 2;
+
+    width: 100%;
+
+    min-height: 100dvh;
+
     display: flex;
+
     align-items: center;
     justify-content: center;
-    background: #ffffff;
-    padding: 40px 24px;
+
+    padding: 40px;
+
+    background:
+        radial-gradient(
+            circle at 85% 10%,
+            rgba(20, 184, 166, 0.10),
+            transparent 30%
+        ),
+
+        radial-gradient(
+            circle at 10% 90%,
+            rgba(13, 148, 136, 0.08),
+            transparent 28%
+        ),
+
+        #f8fafc;
 }
+
+.right-panel::before {
+    content: '';
+
+    position: absolute;
+
+    width: 260px;
+    height: 260px;
+
+    top: -100px;
+    right: -100px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(20, 184, 166, 0.07);
+}
+
+.right-panel::after {
+    content: '';
+
+    position: absolute;
+
+    width: 180px;
+    height: 180px;
+
+    bottom: -80px;
+    left: -80px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(15, 118, 110, 0.06);
+}
+
+
+/* ==========================================================================
+   13. LOGIN CARD
+   ========================================================================== */
 
 .login-wrapper {
+    position: relative;
+
+    z-index: 2;
+
     width: 100%;
-    max-width: 460px;
-    background: #ffffff;
-    border-radius: 20px;
-    padding: 44px 42px;
-    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08), 0 4px 16px rgba(15, 23, 42, 0.04);
-    border: 1px solid #eef2f7;
-    animation: fadeSlideIn 0.7s ease 0.1s both;
+    max-width: 480px;
+
+    margin: auto;
+
+    padding: 40px;
+
+    border:
+        1px solid
+        rgba(226, 232, 240, 0.90);
+
+    border-radius: 28px;
+
+    background:
+        rgba(255, 255, 255, 0.94);
+
+    box-shadow: var(--shadow-lg);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    animation:
+        cardEnter
+        0.8s
+        cubic-bezier(.22, 1, .36, 1)
+        0.08s
+        both;
 }
 
+.login-wrapper::before {
+    content: '';
+
+    position: absolute;
+
+    top: 0;
+
+    left: 12%;
+    right: 12%;
+
+    height: 3px;
+
+    border-radius:
+        0 0 999px 999px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            var(--primary-light),
+            var(--primary),
+            transparent
+        );
+}
+
+
+/* ==========================================================================
+   14. LOGIN HEADER
+   ========================================================================== */
+
 .login-header {
-    margin-bottom: 32px;
     text-align: center;
+
+    margin-bottom: 28px;
 }
 
 .login-header .login-icon {
-    width: 58px;
-    height: 58px;
-    margin: 0 auto 16px;
-    border-radius: 50px;
-    background: linear-gradient(135deg, #5cdfc2, #0f766e);
+    position: relative;
+
+    width: 66px;
+    height: 66px;
+
     display: flex;
+
     align-items: center;
     justify-content: center;
-    color: #fff;
-    font-size: 24px;
-    box-shadow: 0 8px 20px rgba(238, 239, 239, 0.35);
+
+    margin:
+        0 auto 18px;
+
+    border:
+        1px solid
+        rgba(20, 184, 166, 0.18);
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #ccfbf1,
+            #e6fffb
+        );
+
+    color: var(--primary);
+
+    box-shadow:
+        0 12px 28px
+        rgba(20, 184, 166, 0.15),
+
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.8);
+}
+
+.login-header .login-icon::before {
+    content: '';
+
+    position: absolute;
+
+    inset: -7px;
+
+    border:
+        1px solid
+        rgba(20, 184, 166, 0.10);
+
+    border-radius: 25px;
+}
+
+.login-header .login-icon i {
+    margin: 0 !important;
+
+    color: var(--primary) !important;
+
+    font-size: 24px !important;
 }
 
 .login-header h2 {
-    font-size: 26px;
-    color: #0f172a;
-    font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 9px;
+
+    color: var(--text);
+
+    font-size: 27px;
+
+    line-height: 1.25;
+
+    font-weight: 800;
+
+    letter-spacing: -0.7px;
 }
 
 .login-header p {
-    color: #64748b;
-    font-size: 14px;
-    line-height: 1.6;
+    max-width: 360px;
+
+    margin: 0 auto;
+
+    color: var(--text-soft);
+
+    font-size: 13px;
+
+    line-height: 1.7;
 }
 
-/* ---------- Alert Messages ---------- */
+
+/* ==========================================================================
+   15. ALERT
+   ========================================================================== */
+
 .alert {
-    padding: 13px 16px;
-    border-radius: 10px;
-    font-size: 13px;
-    line-height: 1.5;
-    margin-bottom: 22px;
     display: flex;
+
     align-items: flex-start;
-    gap: 10px;
-    animation: fadeSlideIn 0.4s ease both;
+
+    gap: 11px;
+
+    padding: 13px 14px;
+
+    margin-bottom: 20px;
+
+    border-radius: 13px;
+
+    font-size: 12px;
+
+    line-height: 1.55;
+
+    animation:
+        alertEnter
+        0.35s
+        ease
+        both;
 }
 
 .alert i {
+    flex-shrink: 0;
+
     margin-top: 2px;
 }
 
 .alert-error {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    color: #b91c1c;
+    color: var(--danger) !important;
+
+    background:
+        var(--danger-bg) !important;
+
+    border:
+        1px solid
+        #fecaca;
 }
 
 .alert-info {
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    color: #1d4ed8;
+    color: var(--info) !important;
+
+    background:
+        var(--info-bg) !important;
+
+    border:
+        1px solid
+        #bae6fd;
 }
 
 .alert-success {
+    color: var(--success);
+
     background: #f0fdf4;
-    border: 1px solid #bbf7d0;
-    color: #15803d;
+
+    border:
+        1px solid
+        #bbf7d0;
 }
 
-/* ---------- Form Groups ---------- */
+
+/* ==========================================================================
+   16. FORM
+   ========================================================================== */
+
+.login-form {
+    width: 100%;
+}
+
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 19px;
 }
 
 .form-group label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    color: #0f172a;
+    display: flex;
+
+    align-items: center;
+
     margin-bottom: 8px;
+
+    color: #1e293b;
+
+    font-size: 12px;
+
+    font-weight: 700;
 }
+
+
+/* ==========================================================================
+   17. INPUT
+   ========================================================================== */
 
 .input-icon {
     position: relative;
+
     display: flex;
+
     align-items: center;
 }
 
 .input-icon .icon-left {
     position: absolute;
-    left: 14px;
+
+    left: 15px;
+
     color: #94a3b8;
-    font-size: 15px;
+
+    font-size: 14px;
+
     pointer-events: none;
-    transition: color 0.25s ease;
+
+    transition:
+        color 0.25s ease,
+        transform 0.25s ease;
 }
 
 .input-icon .icon-right {
     position: absolute;
-    right: 14px;
+
+    right: 15px;
+
     color: #94a3b8;
-    font-size: 15px;
+
+    font-size: 14px;
+
     cursor: pointer;
-    transition: color 0.25s ease;
+
+    transition:
+        color 0.25s ease,
+        transform 0.2s ease;
 }
 
 .input-icon .icon-right:hover {
-    color: #16a385;
+    color: var(--primary);
+
+    transform: scale(1.08);
 }
 
 .input-icon input {
     width: 100%;
-    padding: 13px 45px;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 14px;
-    color: #334155;
+
+    height: 50px;
+
+    padding:
+        0 44px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 13px;
+
     outline: none;
-    transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
-    background-color: #f8fafc;
+
+    background: #f8fafc;
+
+    color: #1e293b;
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    box-shadow:
+        inset 0 1px 2px
+        rgba(15, 23, 42, 0.02);
+
+    transition:
+        border-color 0.25s ease,
+        box-shadow 0.25s ease,
+        background 0.25s ease;
 }
 
 .input-icon input::placeholder {
-    color: #a0aec0;
+    color: #a8b3c2;
+
+    font-weight: 400;
+}
+
+.input-icon input:hover {
+    border-color: #cbd5e1;
 }
 
 .input-icon input:focus {
-    border-color: #16a385;
-    background-color: #ffffff;
-    box-shadow: 0 0 0 4px rgba(22, 163, 132, 0.12);
+    border-color:
+        var(--primary-light);
+
+    background: #ffffff;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(20, 184, 166, 0.10),
+
+        0 5px 14px
+        rgba(15, 118, 110, 0.05);
 }
 
-.input-icon input:focus ~ .icon-left,
 .input-icon:focus-within .icon-left {
-    color: #16a385;
+    color: var(--primary);
+
+    transform: scale(1.08);
 }
 
-/* ---------- Captcha ---------- */
+
+/* ==========================================================================
+   18. CAPTCHA
+   ========================================================================== */
+
 .captcha-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 4px;
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        50px;
+
+    gap: 10px;
+
+    margin-bottom: 10px;
 }
 
 .captcha-box {
-    flex: 1;
-    /* Backend (CaptchaGenerator::generate) selalu membuat SVG captcha
-       dengan tinggi asli 60px. Sebelumnya box ini height:48px, jadi
-       gambar captcha (60px) selalu terpotong sebagian oleh border
-       kotaknya. Disamakan persis ke 60px supaya digit captcha selalu
-       tampil utuh, tidak terpotong maupun melar/gepeng. */
-    height: 60px;
+    width: 100%;
+    height: 58px;
+
     display: flex;
+
     align-items: center;
     justify-content: center;
+
     overflow: hidden;
-    background: repeating-linear-gradient(
-        45deg,
-        #f0fdf4 0px,
-        #f0fdf4 10px,
-        #ecfdf5 10px,
-        #ecfdf5 20px
-    );
-    border: 2px dashed #94d8c8;
-    border-radius: 8px;
+
+    border:
+        1px solid
+        #b7e5dc;
+
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f0fdfa,
+            #ecfdf5
+        );
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.8);
+
     user-select: none;
+
     cursor: pointer;
+
+    transition:
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
 }
 
-/* SVG captcha dirender di ukuran aslinya (tanpa dipaksa melar penuh
-   lebar box) — browser otomatis menjaga rasio aslinya (viewBox 160x60)
-   dan menyusutkannya proporsional kalau layarnya sempit. */
+.captcha-box:hover {
+    border-color: #7dd3c7;
+
+    box-shadow:
+        0 5px 14px
+        rgba(15, 118, 110, 0.08);
+}
+
 .captcha-box svg {
-    max-width: 100%;
-    height: 100%;
     display: block;
+
+    max-width: 100%;
+
+    width: auto;
+
+    height: 100%;
 }
 
 .btn-refresh {
-    width: 60px;
-    height: 60px;
-    min-width: 60px;
-    border-radius: 50%;
-    border: 1.5px solid #e2e8f0;
-    background: #f8fafc;
-    color: #475569;
+    width: 50px;
+    height: 58px;
+
     display: flex;
+
     align-items: center;
     justify-content: center;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 13px;
+
+    background: #ffffff;
+
+    color: var(--primary);
+
     cursor: pointer;
-    font-size: 16px;
-    transition: all 0.3s ease;
+
+    font-size: 15px;
+
+    box-shadow: var(--shadow-sm);
+
+    transition:
+        background 0.25s ease,
+        border-color 0.25s ease,
+        color 0.25s ease,
+        transform 0.3s ease,
+        box-shadow 0.25s ease;
 }
 
 .btn-refresh:hover {
-    background: #16a385;
-    border-color: #16a385;
-    color: #fff;
+    border-color:
+        var(--primary-light);
+
+    background:
+        var(--primary);
+
+    color: #ffffff;
+
     transform: rotate(180deg);
-    box-shadow: 0 6px 16px rgba(22, 163, 132, 0.35);
+
+    box-shadow:
+        0 8px 20px
+        rgba(15, 118, 110, 0.20);
 }
 
-/* ---------- Form Actions ---------- */
-.form-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 6px 0 24px;
+.btn-refresh:active {
+    transform:
+        rotate(180deg)
+        scale(0.95);
 }
 
-.remember-me {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: #475569;
-    cursor: pointer;
+#captcha_answer {
+    letter-spacing: 0.2px;
 }
 
-.remember-me input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    accent-color: #16a385;
-    cursor: pointer;
-}
 
-.forgot-password {
-    font-size: 13px;
-    color: #16a385;
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.2s ease;
-}
+/* ==========================================================================
+   19. LOGIN BUTTON
+   ========================================================================== */
 
-.forgot-password:hover {
-    color: #0f766e;
-    text-decoration: underline;
-}
-
-/* ---------- Buttons ---------- */
 .btn-login {
+    position: relative;
+
+    overflow: hidden;
+
     width: 100%;
-    padding: 14px;
-    background: linear-gradient(135deg, #5cdfc2, #0f766e);
-    color: #fff;
+    height: 52px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 9px;
+
+    margin-top: 8px;
+
     border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 600;
+
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #14b8a6 0%,
+            #0f766e 55%,
+            #115e59 100%
+        );
+
+    color: #ffffff;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
     cursor: pointer;
-    letter-spacing: 0.3px;
-    transition: all 0.3s ease;
-    box-shadow: 0 6px 18px rgba(22, 163, 132, 0.3);
+
+    box-shadow:
+        0 10px 24px
+        rgba(15, 118, 110, 0.25);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        filter 0.25s ease;
+}
+
+.btn-login::before {
+    content: '';
+
+    position: absolute;
+
+    top: 0;
+    bottom: 0;
+
+    left: -80px;
+
+    width: 60px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.28),
+            transparent
+        );
+
+    transform:
+        skewX(-20deg);
+
+    transition:
+        left 0.55s ease;
 }
 
 .btn-login:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(22, 163, 132, 0.4);
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 15px 30px
+        rgba(15, 118, 110, 0.30);
+
+    filter: saturate(1.08);
+}
+
+.btn-login:hover::before {
+    left:
+        calc(100% + 80px);
 }
 
 .btn-login:active {
-    transform: translateY(0);
+    transform:
+        translateY(0);
 }
 
 .btn-login:disabled {
-    opacity: 0.6;
+    opacity: 0.65;
+
     cursor: not-allowed;
+
     transform: none;
+
+    filter: grayscale(0.15);
 }
 
-/* ---------- Security / Support Info ---------- */
+
+/* ==========================================================================
+   20. OTP
+   ========================================================================== */
+
+.otp-box {
+    width: 48px;
+    height: 58px;
+
+    text-align: center;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 14px;
+
+    outline: none;
+
+    background: #f8fafc;
+
+    color: var(--text);
+
+    font-size: 22px;
+
+    font-weight: 800;
+
+    box-shadow:
+        inset 0 1px 2px
+        rgba(15, 23, 42, 0.02);
+
+    transition:
+        border-color 0.25s ease,
+        background 0.25s ease,
+        box-shadow 0.25s ease,
+        transform 0.2s ease;
+}
+
+.otp-box:hover {
+    border-color: #cbd5e1;
+}
+
+.otp-box:focus {
+    border-color:
+        var(--primary-light);
+
+    background: #ffffff;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(20, 184, 166, 0.11),
+
+        0 7px 18px
+        rgba(15, 118, 110, 0.08);
+
+    transform:
+        translateY(-2px);
+}
+
+
+/* ==========================================================================
+   21. OTP ACTION
+   ========================================================================== */
+
+.otp-action {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+
+    margin-top: 16px;
+
+    border: none;
+
+    background: transparent;
+
+    color: var(--primary);
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        color 0.2s ease;
+}
+
+.otp-action:hover {
+    color:
+        var(--primary-dark);
+}
+
+.otp-action:disabled {
+    color: #94a3b8;
+
+    cursor: not-allowed;
+}
+
+.back-login {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    width: 100%;
+
+    margin-top: 17px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #64748b;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        color 0.2s ease;
+}
+
+.back-login:hover {
+    color:
+        var(--primary);
+}
+
+
+/* ==========================================================================
+   22. SECURITY INFO
+   ========================================================================== */
+
 .security-info {
     display: flex;
+
     align-items: flex-start;
-    gap: 12px;
-    background: #dbe5e0;
-    border: 1px solid #d1fae5;
-    padding: 14px 16px;
-    border-radius: 10px;
+
+    gap: 11px;
+
     margin-top: 24px;
+
+    padding: 13px 14px;
+
+    border:
+        1px solid
+        #d5eee9;
+
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f0fdfa,
+            #f8fffd
+        );
 }
 
 .security-info i {
-    color: #16a385;
-    margin-top: 3px;
-    font-size: 14px;
+    flex-shrink: 0;
+
+    width: 26px;
+    height: 26px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background:
+        #ccfbf1;
+
+    color:
+        var(--primary);
+
+    font-size: 11px;
 }
 
 .security-info p {
-    font-size: 12px;
-    color: #090909;
-    line-height: 1.55;
+    color: #50636b;
+
+    font-size: 10.5px;
+
+    line-height: 1.6;
 }
 
+
+/* ==========================================================================
+   23. SUPPORT
+   ========================================================================== */
+
 .support-info {
+    margin-top: 18px;
+
     text-align: center;
-    font-size: 12.5px;
-    color: #64748b;
-    margin-top: 20px;
+
+    color: #94a3b8;
+
+    font-size: 10.5px;
+
+    line-height: 1.5;
 }
 
 .support-info strong {
-    color: #0f172a;
+    color: #475569;
+
+    font-weight: 700;
 }
 
-/* ---------- Animations ---------- */
+
+/* ==========================================================================
+   24. ACCESSIBILITY
+   ========================================================================== */
+
+button:focus-visible,
+input:focus-visible {
+    outline:
+        3px solid
+        rgba(20, 184, 166, 0.18);
+
+    outline-offset: 2px;
+}
+
+
+/* ==========================================================================
+   25. ANIMATIONS
+   ========================================================================== */
+
 @keyframes fadeSlideIn {
     from {
         opacity: 0;
-        transform: translateY(16px);
+
+        transform:
+            translateY(18px);
     }
+
     to {
         opacity: 1;
-        transform: translateY(0);
+
+        transform:
+            translateY(0);
     }
 }
 
-/* ==========================================================================
-   RESPONSIVE
-   ========================================================================== */
-@media (max-width: 960px) {
-    .container {
-        flex-direction: column;
+@keyframes cardEnter {
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(22px)
+            scale(0.985);
     }
 
-    .left-panel {
-        flex: 0 0 auto;
-        min-height: 340px;
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+}
+
+@keyframes alertEnter {
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0);
+    }
+}
+
+
+/* ==========================================================================
+   26. SHORT DESKTOP / LAPTOP
+   ========================================================================== */
+
+@media (min-width: 861px) and (max-height: 800px) {
+
+    .content-wrapper {
+        padding-top: 28px;
+        padding-bottom: 24px;
+    }
+
+    .brand {
+        transform: scale(0.92);
+
+        transform-origin:
+            left top;
+    }
+
+    .main-text {
+        margin-bottom: 20px;
+    }
+
+    .main-text::before {
+        height: 27px;
+
+        margin-bottom: 12px;
+
+        font-size: 9px;
+    }
+
+    .main-text h2 {
+        font-size: 38px;
+
+        line-height: 1.05;
+
+        margin-bottom: 14px;
+    }
+
+    .main-text p {
+        font-size: 12px;
+
+        line-height: 1.55;
+    }
+
+    .features-grid {
+        gap: 8px;
+
+        margin-bottom: 18px;
+    }
+
+    .feature-card {
+        min-height: 92px;
+
+        padding: 12px 14px;
+    }
+
+    .feature-card i {
+        width: 28px;
+        height: 28px;
+
+        margin-bottom: 6px;
+    }
+
+    .feature-card h3 {
+        font-size: 11px;
+    }
+
+    .feature-card p {
+        font-size: 9px;
+    }
+
+    .footer-left {
+        padding-top: 12px;
+
+        font-size: 9px;
+    }
+
+    .right-panel {
+        padding: 25px;
+    }
+
+    .login-wrapper {
+        padding: 30px;
+
+        border-radius: 24px;
+    }
+
+    .login-header {
+        margin-bottom: 20px;
+    }
+
+    .login-header .login-icon {
+        width: 54px;
+        height: 54px;
+
+        margin-bottom: 12px;
+    }
+
+    .login-header h2 {
+        font-size: 23px;
+
+        margin-bottom: 6px;
+    }
+
+    .login-header p {
+        font-size: 11px;
+
+        line-height: 1.5;
+    }
+
+    .form-group {
+        margin-bottom: 14px;
+    }
+
+    .input-icon input {
+        height: 45px;
+    }
+
+    .captcha-box,
+    .btn-refresh {
+        height: 50px;
+    }
+
+    .btn-login {
+        height: 48px;
+    }
+
+    .security-info {
+        margin-top: 17px;
+
+        padding: 10px 12px;
+    }
+
+    .support-info {
+        margin-top: 12px;
+    }
+}
+
+
+/* ==========================================================================
+   27. TABLET
+   ========================================================================== */
+
+@media (max-width: 1100px) and (min-width: 861px) {
+
+    .container {
+        grid-template-columns:
+            minmax(0, 1fr)
+            minmax(430px, 0.85fr);
     }
 
     .content-wrapper {
-        padding: 30px 28px;
+        padding: 40px;
     }
 
-    .features-grid,
-    .flow {
+    .main-text h2 {
+        font-size: 42px;
+    }
+
+    .features-grid {
         max-width: 100%;
     }
 
     .right-panel {
-        padding: 32px 18px;
+        padding: 28px;
     }
 
     .login-wrapper {
-        padding: 34px 28px;
+        padding: 34px;
     }
 }
 
-@media (max-width: 560px) {
+
+/* ==========================================================================
+   28. MOBILE
+   ========================================================================== */
+
+@media (max-width: 860px) {
+
+    html,
+    body,
+    #root {
+        min-height: 100%;
+    }
+
+    body {
+        overflow-x: hidden;
+
+        overflow-y: auto;
+    }
+
+    .container {
+        min-height: 100dvh;
+
+        display: flex;
+
+        flex-direction: column;
+    }
+
     .left-panel {
-        min-height: 300px;
+        position: relative;
+
+        top: auto;
+
+        width: 100%;
+
+        height: auto;
+
+        min-height: auto;
+
+        overflow: hidden;
+    }
+
+    .content-wrapper {
+        width: 100%;
+
+        height: auto;
+
+        min-height: auto;
+
+        padding:
+            30px
+            28px
+            34px;
+    }
+
+    .main-text {
+        margin-top: 54px;
+
+        margin-bottom: 26px;
     }
 
     .main-text h2 {
-        font-size: 26px;
+        font-size: 36px;
+
+        letter-spacing: -1.1px;
     }
+
+    .features-grid {
+        margin-bottom: 26px;
+    }
+
+    .right-panel {
+        width: 100%;
+
+        min-height: auto;
+
+        padding:
+            35px
+            20px
+            45px;
+    }
+
+    .login-wrapper {
+        width: 100%;
+
+        max-width: 520px;
+
+        margin: 0 auto;
+    }
+}
+
+
+/* ==========================================================================
+   29. SMALL MOBILE
+   ========================================================================== */
+
+@media (max-width: 560px) {
+
+    .content-wrapper {
+        padding:
+            24px
+            20px
+            28px;
+    }
+
+    .brand {
+        gap: 11px;
+    }
+
+    .logo-icon {
+        width: 44px;
+        height: 44px;
+
+        min-width: 44px;
+
+        border-radius: 13px;
+
+        font-size: 17px;
+    }
+
+    .brand-text h1 {
+        font-size: 11.5px;
+
+        letter-spacing: 0.7px;
+    }
+
+    .brand-text p {
+        font-size: 10px;
+    }
+
+    .main-text {
+        margin-top: 44px;
+    }
+
+    .main-text::before {
+        height: 27px;
+
+        font-size: 9px;
+
+        padding: 0 10px;
+    }
+
+    .main-text h2 {
+        font-size: 30px;
+
+        line-height: 1.12;
+
+        letter-spacing: -0.9px;
+    }
+
+    .main-text p {
+        font-size: 12.5px;
+
+        line-height: 1.65;
+    }
+
+    .features-grid {
+        grid-template-columns:
+            1fr 1fr;
+
+        gap: 9px;
+    }
+
+    .feature-card {
+        min-height: 105px;
+
+        padding: 13px;
+
+        border-radius: 14px;
+    }
+
+    .feature-card i {
+        width: 30px;
+        height: 30px;
+
+        margin-bottom: 8px;
+
+        font-size: 13px;
+    }
+
+    .feature-card h3 {
+        font-size: 10.5px;
+    }
+
+    .feature-card p {
+        font-size: 9px;
+    }
+
+    .footer-left {
+        font-size: 9px;
+    }
+
+    .right-panel {
+        padding:
+            24px
+            14px
+            34px;
+    }
+
+    .login-wrapper {
+        padding:
+            29px
+            20px;
+
+        border-radius: 22px;
+    }
+
+    .login-header {
+        margin-bottom: 24px;
+    }
+
+    .login-header .login-icon {
+        width: 58px;
+        height: 58px;
+
+        margin-bottom: 15px;
+
+        border-radius: 17px;
+    }
+
+    .login-header h2 {
+        font-size: 23px;
+    }
+
+    .login-header p {
+        font-size: 11.5px;
+    }
+
+    .form-group {
+        margin-bottom: 17px;
+    }
+
+    .input-icon input {
+        height: 48px;
+
+        font-size: 12px;
+    }
+
+    .captcha-container {
+        grid-template-columns:
+            minmax(0, 1fr)
+            48px;
+    }
+
+    .captcha-box,
+    .btn-refresh {
+        height: 54px;
+    }
+
+    .btn-refresh {
+        width: 48px;
+    }
+
+    .btn-login {
+        height: 50px;
+    }
+
+    .otp-box {
+        width: 42px;
+        height: 52px;
+
+        font-size: 19px;
+
+        border-radius: 12px;
+    }
+
+    .security-info {
+        margin-top: 20px;
+    }
+}
+
+
+/* ==========================================================================
+   30. VERY SMALL MOBILE
+   ========================================================================== */
+
+@media (max-width: 380px) {
 
     .features-grid {
         grid-template-columns: 1fr;
     }
 
-    .brand-text h1 {
-        font-size: 13px;
+    .feature-card {
+        min-height: auto;
     }
 
-    .login-header h2 {
-        font-size: 22px;
+    .otp-box {
+        width: 39px;
+
+        height: 50px;
     }
 
     .login-wrapper {
-        padding: 28px 20px;
-        border-radius: 16px;
-    }
+        padding-left: 16px;
 
-    .captcha-box,
-    .btn-refresh {
-        height: 52px;
+        padding-right: 16px;
     }
+}
 
-    .btn-refresh {
-        width: 52px;
-        min-width: 52px;
+
+/* ==========================================================================
+   31. REDUCE MOTION
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+
+        animation-iteration-count: 1 !important;
+
+        transition-duration: 0.01ms !important;
+
+        scroll-behavior: auto !important;
     }
 }
