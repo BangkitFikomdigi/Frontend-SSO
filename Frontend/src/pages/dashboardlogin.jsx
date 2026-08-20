@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../assets/style/login.css';
 import bgLogin from '../assets/gambar/background_login.jpg';
-
-// Base URL backend Laravel, diambil dari .env (VITE_API_BASE_URL).
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://192.168.4.22:8000';
+import { API_BASE } from '../config/api';
 
 const Login = ({ onLoginSuccess }) => {
   // State untuk menyimpan input user
@@ -151,9 +149,12 @@ const Login = ({ onLoginSuccess }) => {
           type: 'info',
           message: data.message || 'Kode OTP telah dikirimkan ke email Anda. Silakan masukkan di bawah.'
         });
-      } else if (data.data && data.data.refresh_token) {
+      } else if (data.data && data.data.access_token) {
         // Backend langsung memberi sesi aktif tanpa OTP
-        onLoginSuccess?.(data.data.refresh_token);
+        onLoginSuccess?.({
+          accessToken: data.data.access_token,
+          refreshToken: data.data.refresh_token
+        });
       } else {
         throw new Error('Respons login tidak dikenali dari server.');
       }
@@ -292,7 +293,7 @@ const Login = ({ onLoginSuccess }) => {
         throw new Error(data.message || 'Verifikasi OTP gagal. Silakan coba lagi.');
       }
 
-      if (!data.data || !data.data.refresh_token) {
+      if (!data.data || !data.data.access_token) {
         throw new Error('Token sesi tidak diterima dari server.');
       }
 
@@ -301,7 +302,10 @@ const Login = ({ onLoginSuccess }) => {
         message: data.message || 'Verifikasi berhasil! Mengalihkan ke dashboard...'
       });
 
-      onLoginSuccess?.(data.data.refresh_token);
+      onLoginSuccess?.({
+        accessToken: data.data.access_token,
+        refreshToken: data.data.refresh_token
+      });
     } catch (error) {
       setAlert({
         type: 'error',

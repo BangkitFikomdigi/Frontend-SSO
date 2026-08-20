@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Dashboardlogin from './pages/dashboardlogin'; // Halaman Login
 import Dashboard_Utama from './pages/Dashboard_Utama'; // Halaman Dashboard Utama
 import './assets/style/Dashboard_Utama.css'; // dipakai untuk styling loader awal (.loader-container, .spinner)
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://192.168.4.22:8000';
+import { API_BASE } from './config/api';
 
 function App() {
   // 'checking'  -> sedang memvalidasi token yang ada di localStorage
@@ -20,7 +19,7 @@ function App() {
   // wajib atau tidak, dan itu ditentukan backend saat login (lihat
   // AuthController::shouldRequireOtp), bukan disembunyikan di sini.
   const validateSession = useCallback(async () => {
-    const token = localStorage.getItem('sso_token');
+    const token = localStorage.getItem('sso_access_token');
 
     if (!token) {
       setSessionUser(null);
@@ -53,10 +52,11 @@ function App() {
       console.error('Gagal memvalidasi sesi SSO:', error);
     }
 
-    // Token tidak ada / tidak valid lagi -> tampilkan halaman login.
+    // access_token tidak ada / tidak valid lagi -> tampilkan halaman login.
     // Tidak perlu hapus token secara khusus di sini; login berikutnya akan
     // menimpa localStorage dengan token baru begitu berhasil.
-    localStorage.removeItem('sso_token');
+    localStorage.removeItem('sso_access_token');
+    localStorage.removeItem('sso_refresh_token');
     setSessionUser(null);
     setAuthStatus('guest');
   }, []);
@@ -66,22 +66,25 @@ function App() {
     validateSession();
   }, [validateSession]);
 
-  // Callback setelah sukses login (baik langsung dapat refresh_token tanpa
-  // OTP, maupun setelah verifikasi OTP di halaman login)
-  const handleLoginSuccess = async (token) => {
-    localStorage.setItem('sso_token', token);
+  // Callback setelah sukses login (baik langsung dapat token tanpa OTP,
+  // maupun setelah verifikasi OTP di halaman login)
+  const handleLoginSuccess = async ({ accessToken, refreshToken }) => {
+    localStorage.setItem('sso_access_token', accessToken);
+    if (refreshToken) {
+      localStorage.setItem('sso_refresh_token', refreshToken);
+    }
     setAuthStatus('checking');
     await validateSession(); // ambil data user (username, modules) sebelum masuk dashboard
   };
 
   // Callback saat user pencet tombol Logout
   const handleLogout = async () => {
-    const token = localStorage.getItem('sso_token');
+    const token = localStorage.getItem('sso_access_token');
 
-    // Beritahu backend supaya refresh_token ini benar-benar dihapus di
-    // server (bukan cuma dihapus dari localStorage). Ini KRUSIAL: cuma
-    // logout eksplisit yang boleh menghapus refresh_token di server -
-    // itulah yang membuat login berikutnya wajib OTP lagi (lihat
+    // Beritahu backend supaya session ini benar-benar dihapus di server
+    // (bukan cuma dihapus dari localStorage). Ini KRUSIAL: cuma logout
+    // eksplisit yang boleh menghapus session di server - itulah yang
+    // membuat login berikutnya wajib OTP lagi (lihat
     // AuthController::shouldRequireOtp).
     if (token) {
       try {
@@ -99,7 +102,8 @@ function App() {
       }
     }
 
-    localStorage.removeItem('sso_token');
+    localStorage.removeItem('sso_access_token');
+    localStorage.removeItem('sso_refresh_token');
     setSessionUser(null);
     setAuthStatus('guest');
   };
