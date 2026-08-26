@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../assets/style/Dashboard_Utama.css';
 
-const Dashboard = ({ username = 'User', modules = [], onLogout }) => {
+const Dashboard = ({ username = 'User', name, modules = [], onLogout }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -51,7 +51,8 @@ const Dashboard = ({ username = 'User', modules = [], onLogout }) => {
     return name.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
-  const initial = username ? username.charAt(0).toUpperCase() : 'U';
+  const displayName = name || username;
+  const initial = displayName ? displayName.charAt(0).toUpperCase() : 'U';
 
   return (
     <div className="dashboard-page">
@@ -78,14 +79,15 @@ const Dashboard = ({ username = 'User', modules = [], onLogout }) => {
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
               <div className="user-avatar">{initial}</div>
-              <span className="user-name">{username}</span>
+              <span className="user-name">{displayName}</span>
               <i className="fa-solid fa-chevron-down caret-icon"></i>
             </button>
 
             <div className={`user-dropdown ${isDropdownOpen ? 'open' : ''}`}>
               <div className="user-dropdown-header">
                 <p className="dropdown-label">Signed in as</p>
-                <p className="dropdown-username">{username}</p>
+                <p className="dropdown-username">{displayName}</p>
+                <p className="dropdown-label" style={{ marginTop: '2px' }}>NIP: {username}</p>
               </div>
               <button type="button" className="logout-btn" onClick={handleLogout}>
                 <i className="fa-solid fa-arrow-right-from-bracket"></i> Logout Sesi
@@ -100,7 +102,7 @@ const Dashboard = ({ username = 'User', modules = [], onLogout }) => {
         {/* WELCOME BANNER */}
         <section className="welcome-banner">
           <div className="banner-content">
-            <h1>Selamat Datang Kembali, <span>{username}</span>!</h1>
+            <h1>Selamat Datang Kembali, <span>{displayName}</span>!</h1>
             <p>Akses seluruh modul operasional dan layanan internal rumah sakit dalam satu pintu SSO.</p>
           </div>
           <div className="banner-stats">

@@ -43,6 +43,7 @@ function App() {
       if (data && data.success && data.valid) {
         setSessionUser({
           username: data.data?.user?.username || 'User',
+          name: data.data?.user?.name || data.data?.user?.username || 'User',
           modules: data.data?.user?.modul_akses || []
         });
         setAuthStatus('auth');
@@ -123,6 +124,7 @@ function App() {
       {authStatus === 'auth' ? (
         <Dashboard_Utama
           username={sessionUser?.username}
+          name={sessionUser?.name}
           modules={sessionUser?.modules || []}
           onLogout={handleLogout}
         />

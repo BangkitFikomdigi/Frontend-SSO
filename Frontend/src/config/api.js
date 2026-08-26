@@ -11,9 +11,20 @@
 //   VITE_API_BASE_URL_LOCAL -> dipakai saat akses via localhost/127.0.0.1
 
 const LOCAL_HOSTNAMES = ['localhost', '127.0.0.1', '::1'];
+const IP_HOSTNAMES = {
+  '192.168.4.22': 'http://192.168.4.22:8000',
+  '192.168.4.23': 'http://192.168.4.23:8000',
+};
 
-const isLocalHost = LOCAL_HOSTNAMES.includes(window.location.hostname);
+const hostname = window.location.hostname;
+const isLocalHost = LOCAL_HOSTNAMES.includes(hostname);
+const ipBackend = IP_HOSTNAMES[hostname];
 
-export const API_BASE = isLocalHost
+// Debug: log the resolved API base URL to console
+const resolvedBase = isLocalHost
   ? (import.meta.env.VITE_API_BASE_URL_LOCAL || 'http://localhost:8000')
-  : (import.meta.env.VITE_API_BASE_URL || 'http://192.168.4.22:8000');
+  : (import.meta.env.VITE_API_BASE_URL || ipBackend || 'http://192.168.4.22:8000');
+
+console.log('[API Config] Hostname:', hostname, '| Resolved API_BASE:', resolvedBase);
+
+export const API_BASE = resolvedBase;
