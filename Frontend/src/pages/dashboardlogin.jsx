@@ -441,7 +441,7 @@ const Login = ({ onLoginSuccess }) => {
             <form onSubmit={handleSubmit} className="login-form">
               {/* USERNAME */}
               <div className="form-group">
-                <label htmlFor="username">Username / NIP</label>
+                <label htmlFor="username">NIK</label>
                 <div className="input-icon">
                   <i className="fa-regular fa-user icon-left"></i>
                   <input
@@ -450,7 +450,7 @@ const Login = ({ onLoginSuccess }) => {
                     name="username"
                     value={formData.username}
                     onChange={handleChange}
-                    placeholder="Masukkan username"
+                    placeholder="Masukkan NIK"
                     required
                     autoFocus
                   />
