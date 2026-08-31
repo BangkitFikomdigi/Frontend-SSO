@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../assets/style/ResetPassword.css';
 import { API_BASE } from '../config/api';
 
 const ResetPassword = ({ onResetSuccess, onBackToLogin, username }) => {
+  const [usernameInput, setUsernameInput] = useState(username || '');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -21,7 +22,14 @@ const ResetPassword = ({ onResetSuccess, onBackToLogin, username }) => {
     match: confirmPassword.length > 0 && password === confirmPassword,
   };
 
-  const isAllValid = Object.values(rules).every(Boolean);
+  const isAllValid = Object.values(rules).every(Boolean) && usernameInput.trim().length > 0;
+
+  // Kalau parent (halaman login) meneruskan username setelah komponen ini
+  // sudah mount (mis. user isi username dulu baru klik "Lupa kata sandi?"
+  // di render berikutnya), sinkronkan ke field ini.
+  useEffect(() => {
+    if (username) setUsernameInput(username);
+  }, [username]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,7 +47,7 @@ const ResetPassword = ({ onResetSuccess, onBackToLogin, username }) => {
           Accept: 'application/json',
         },
         body: JSON.stringify({
-          username: username || '',
+          username: usernameInput.trim(),
           new_password: password,
         }),
         credentials: 'include',
@@ -71,9 +79,11 @@ const ResetPassword = ({ onResetSuccess, onBackToLogin, username }) => {
   return (
     <div className="reset-container">
       <div className="reset-card">
-        {/* HEADER LOGO & JUDUL */}
+        {/* HEADER ICON & JUDUL */}
         <div className="reset-header">
-          <img src={logoJateng} alt="Logo Jawa Tengah" className="reset-logo" />
+          <div className="reset-logo">
+            <i className="fa-solid fa-key" style={{ fontSize: '24px', color: '#16a385' }}></i>
+          </div>
           <div className="reset-title-group">
             <h2>Reset Password</h2>
             <p>Silakan masukkan password baru dan konfirmasi password</p>
@@ -88,6 +98,17 @@ const ResetPassword = ({ onResetSuccess, onBackToLogin, username }) => {
 
         {/* FORM INPUT */}
         <form onSubmit={handleSubmit}>
+          <div className="reset-input-group">
+            <input
+              type="text"
+              placeholder="NIK"
+              value={usernameInput}
+              onChange={(e) => setUsernameInput(e.target.value)}
+              readOnly={Boolean(username)}
+              required
+            />
+          </div>
+
           <div className="reset-input-group">
             <input
               type={showPassword ? 'text' : 'password'}
