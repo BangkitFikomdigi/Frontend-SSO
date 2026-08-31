@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../assets/style/login.css';
 import bgLogin from '../assets/gambar/background_login.jpg';
 import { API_BASE } from '../config/api';
+import ResetPassword from './ResetPassword';
 
 const Login = ({ onLoginSuccess }) => {
   // State untuk menyimpan input user
@@ -24,6 +25,8 @@ const Login = ({ onLoginSuccess }) => {
   const [otpUsername, setOtpUsername] = useState('');
   const [isResendingOtp, setIsResendingOtp] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+
+  const [showResetPassword, setShowResetPassword] = useState(false);
 
   // Fungsi mengambil captcha dari API Backend
   const fetchCaptcha = async () => {
@@ -385,278 +388,299 @@ const Login = ({ onLoginSuccess }) => {
 
       {/* ================= BAGIAN KANAN ================= */}
       <div className="right-panel">
-        <div className="login-wrapper">
-          <div className="login-header">
-            <div className="login-icon">
-              <i
-                className={`fa-solid ${isOtpStep ? 'fa-shield-halved' : 'fa-lock'}`}
-                style={{
-                  fontSize: '24px',
-                  color: '#16a385',
-                  marginBottom: '15px'
-                }}
-              ></i>
+        {showResetPassword ? (
+          <ResetPassword 
+            onBackToLogin={() => setShowResetPassword(false)}
+            onResetSuccess={() => setShowResetPassword(false)}
+          />
+        ) : (
+          <div className="login-wrapper">
+            <div className="login-header">
+              <div className="login-icon">
+                <i
+                  className={`fa-solid ${isOtpStep ? 'fa-shield-halved' : 'fa-lock'}`}
+                  style={{
+                    fontSize: '24px',
+                    color: '#16a385',
+                    marginBottom: '15px'
+                  }}
+                ></i>
+              </div>
+
+              <h2>{isOtpStep ? 'Verifikasi OTP' : 'Selamat datang'}</h2>
+
+              <p>
+                {isOtpStep
+                  ? 'Masukkan 6 digit kode keamanan yang dikirimkan ke nomor Anda.'
+                  : 'Masuk dengan akun pegawai untuk melanjutkan ke portal aplikasi.'}
+              </p>
             </div>
 
-            <h2>{isOtpStep ? 'Verifikasi OTP' : 'Selamat datang'}</h2>
-
-            <p>
-              {isOtpStep
-                ? 'Masukkan 6 digit kode keamanan yang dikirimkan ke nomor Anda.'
-                : 'Masuk dengan akun pegawai untuk melanjutkan ke portal aplikasi.'}
-            </p>
-          </div>
-
-          {/* ================= ALERT ================= */}
-          {alert && (
-            <div
-              className={`alert ${
-                alert.type === 'error' ? 'alert-error' : 'alert-info'
-              }`}
-              style={{
-                color: alert.type === 'error' ? '#dc2626' : '#0284c7',
-                background: alert.type === 'error' ? '#fef2f2' : '#f0f9ff',
-                padding: '12px',
-                borderRadius: '8px',
-                marginBottom: '20px',
-                fontSize: '13px'
-              }}
-            >
-              <i
-                className={`fa-solid ${
-                  alert.type === 'error'
-                    ? 'fa-circle-exclamation'
-                    : alert.message.includes('keluar')
-                    ? 'fa-right-from-bracket'
-                    : 'fa-clock'
+            {/* ================= ALERT ================= */}
+            {alert && (
+              <div
+                className={`alert ${
+                  alert.type === 'error' ? 'alert-error' : 'alert-info'
                 }`}
-              ></i>{' '}
-              {alert.message}
-            </div>
-          )}
-
-          {/* ================= RENDER FORM BERDASARKAN STEP ================= */}
-          {!isOtpStep ? (
-            /* --- FORM 1: LOGIN UTAMA --- */
-            <form onSubmit={handleSubmit} className="login-form">
-              {/* USERNAME */}
-              <div className="form-group">
-                <label htmlFor="username">NIK</label>
-                <div className="input-icon">
-                  <i className="fa-regular fa-user icon-left"></i>
-                  <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleChange}
-                    placeholder="Masukkan NIK"
-                    required
-                    autoFocus
-                  />
-                </div>
-              </div>
-
-              {/* PASSWORD */}
-              <div className="form-group">
-                <label htmlFor="password">Kata sandi</label>
-                <div className="input-icon">
-                  <i className="fa-solid fa-lock icon-left"></i>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="Masukkan kata sandi"
-                    required
-                  />
-                  <i
-                    className={`fa-solid ${
-                      showPassword ? 'fa-eye-slash' : 'fa-eye'
-                    } icon-right`}
-                    onClick={() => setShowPassword(!showPassword)}
-                    title={
-                      showPassword ? 'Sembunyikan sandi' : 'Tampilkan sandi'
-                    }
-                    style={{ cursor: 'pointer' }}
-                  ></i>
-                </div>
-              </div>
-
-              {/* CAPTCHA */}
-              <div className="form-group">
-                <label htmlFor="captcha_answer">Kode Captcha</label>
-                <div className="captcha-container">
-                  <div
-                    className="captcha-box"
-                    dangerouslySetInnerHTML={{ __html: captcha.svg }}
-                  />
-                  <button
-                    type="button"
-                    className="btn-refresh"
-                    onClick={fetchCaptcha}
-                    title="Ganti Captcha"
-                  >
-                    <i className="fa-solid fa-rotate-right"></i>
-                  </button>
-                </div>
-
-                <div className="input-icon">
-                  <i className="fa-solid fa-shield-keyhole icon-left"></i>
-                  <input
-                    type="text"
-                    id="captcha_answer"
-                    name="captchaAnswer"
-                    value={formData.captchaAnswer}
-                    onChange={handleChange}
-                    placeholder="Masukkan kode captcha di atas"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* TOMBOL LOGIN */}
-              <button
-                type="submit"
-                className="btn-login"
-                disabled={isLoading}
+                style={{
+                  color: alert.type === 'error' ? '#dc2626' : '#0284c7',
+                  background: alert.type === 'error' ? '#fef2f2' : '#f0f9ff',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  marginBottom: '20px',
+                  fontSize: '13px'
+                }}
               >
-                {isLoading ? (
-                  <>
-                    <i className="fa-solid fa-spinner fa-spin"></i> Memprose...
-                  </>
-                ) : (
-                  <>
-                    <i className="fa-solid fa-right-to-bracket"></i> Masuk ke Portal
-                  </>
-                )}
-              </button>
-            </form>
-          ) : (
-            /* --- FORM 2: VERIFIKASI OTP --- */
-            <form onSubmit={handleOtpSubmit} className="login-form">
-              <div className="form-group" style={{ marginBottom: '24px' }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: '8px',
-                    justifyContent: 'center',
-                    marginTop: '10px'
-                  }}
-                >
-                  {otpValues.map((val, idx) => (
+                <i
+                  className={`fa-solid ${
+                    alert.type === 'error'
+                      ? 'fa-circle-exclamation'
+                      : alert.message.includes('keluar')
+                      ? 'fa-right-from-bracket'
+                      : 'fa-clock'
+                  }`}
+                ></i>{' '}
+                {alert.message}
+              </div>
+            )}
+
+            {/* ================= RENDER FORM BERDASARKAN STEP ================= */}
+            {!isOtpStep ? (
+              /* --- FORM 1: LOGIN UTAMA --- */
+              <form onSubmit={handleSubmit} className="login-form">
+                {/* USERNAME */}
+                <div className="form-group">
+                  <label htmlFor="username">NIK</label>
+                  <div className="input-icon">
+                    <i className="fa-regular fa-user icon-left"></i>
                     <input
-                      key={idx}
-                      id={`otp-input-${idx}`}
                       type="text"
-                      maxLength="1"
-                      value={val}
-                      onChange={(e) => handleOtpChange(idx, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                      className="otp-box"
-                      autoFocus={idx === 0}
+                      id="username"
+                      name="username"
+                      value={formData.username}
+                      onChange={handleChange}
+                      placeholder="Masukkan NIK"
+                      required
+                      autoFocus
                     />
-                  ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* TOMBOL VERIFIKASI OTP */}
-              <button
-                type="submit"
-                className="btn-login"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <i className="fa-solid fa-spinner fa-spin"></i> Memverifikasi...
-                  </>
-                ) : (
-                  <>
-                    <i className="fa-solid fa-circle-check"></i> Verifikasi Kode
-                  </>
-                )}
-              </button>
+                {/* PASSWORD */}
+                <div className="form-group">
+                  <label htmlFor="password">Kata sandi</label>
+                  <div className="input-icon">
+                    <i className="fa-solid fa-lock icon-left"></i>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Masukkan kata sandi"
+                      required
+                    />
+                    <i
+                      className={`fa-solid ${
+                        showPassword ? 'fa-eye-slash' : 'fa-eye'
+                      } icon-right`}
+                      onClick={() => setShowPassword(!showPassword)}
+                      title={
+                        showPassword ? 'Sembunyikan sandi' : 'Tampilkan sandi'
+                      }
+                      style={{ cursor: 'pointer' }}
+                    ></i>
+                  </div>
+                  {/* TRIGGER LUPA PASSWORD */}
+                  <div style={{ textAlign: 'right', marginTop: '8px' }}>
+                    <span
+                      onClick={() => setShowResetPassword(true)}
+                      style={{
+                        fontSize: '13px',
+                        color: '#16a385',
+                        cursor: 'pointer',
+                        fontWeight: '600'
+                      }}
+                    >
+                      Lupa kata sandi?
+                    </span>
+                  </div>
+                </div>
 
-              {/* KIRIM ULANG KODE OTP */}
-              <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                {/* CAPTCHA */}
+                <div className="form-group">
+                  <label htmlFor="captcha_answer">Kode Captcha</label>
+                  <div className="captcha-container">
+                    <div
+                      className="captcha-box"
+                      dangerouslySetInnerHTML={{ __html: captcha.svg }}
+                    />
+                    <button
+                      type="button"
+                      className="btn-refresh"
+                      onClick={fetchCaptcha}
+                      title="Ganti Captcha"
+                    >
+                      <i className="fa-solid fa-rotate-right"></i>
+                    </button>
+                  </div>
+
+                  <div className="input-icon">
+                    <i className="fa-solid fa-shield-keyhole icon-left"></i>
+                    <input
+                      type="text"
+                      id="captcha_answer"
+                      name="captchaAnswer"
+                      value={formData.captchaAnswer}
+                      onChange={handleChange}
+                      placeholder="Masukkan kode captcha di atas"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* TOMBOL LOGIN */}
                 <button
-                  type="button"
-                  onClick={handleResendOtp}
-                  disabled={resendCooldown > 0 || isResendingOtp}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: resendCooldown > 0 ? '#94a3b8' : '#16a385',
-                    cursor: resendCooldown > 0 || isResendingOtp ? 'not-allowed' : 'pointer',
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
+                  type="submit"
+                  className="btn-login"
+                  disabled={isLoading}
                 >
-                  {isResendingOtp ? (
+                  {isLoading ? (
                     <>
-                      <i className="fa-solid fa-spinner fa-spin"></i> Mengirim ulang...
-                    </>
-                  ) : resendCooldown > 0 ? (
-                    <>
-                      <i className="fa-regular fa-clock"></i> Kirim ulang kode ({resendCooldown}s)
+                      <i className="fa-solid fa-spinner fa-spin"></i> Memproses...
                     </>
                   ) : (
                     <>
-                      <i className="fa-solid fa-rotate-right"></i> Kirim ulang kode OTP
+                      <i className="fa-solid fa-right-to-bracket"></i> Masuk ke Portal
                     </>
                   )}
                 </button>
-              </div>
+              </form>
+            ) : (
+              /* --- FORM 2: VERIFIKASI OTP --- */
+              <form onSubmit={handleOtpSubmit} className="login-form">
+                <div className="form-group" style={{ marginBottom: '24px' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '8px',
+                      justifyContent: 'center',
+                      marginTop: '10px'
+                    }}
+                  >
+                    {otpValues.map((val, idx) => (
+                      <input
+                        key={idx}
+                        id={`otp-input-${idx}`}
+                        type="text"
+                        maxLength="1"
+                        value={val}
+                        onChange={(e) => handleOtpChange(idx, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                        className="otp-box"
+                        autoFocus={idx === 0}
+                      />
+                    ))}
+                  </div>
+                </div>
 
-              {/* KEMBALI KE FORM LOGIN */}
-              <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                {/* TOMBOL VERIFIKASI OTP */}
                 <button
-                  type="button"
-                  onClick={() => {
-                    setIsOtpStep(false);
-                    setOtpValues(['', '', '', '', '', '']);
-                    setResendCooldown(0);
-                    setAlert(null);
-                    fetchCaptcha();
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#16a385',
-                    cursor: 'pointer',
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
+                  type="submit"
+                  className="btn-login"
+                  disabled={isLoading}
                 >
-                  <i className="fa-solid fa-arrow-left"></i> Kembali ke Form Login
+                  {isLoading ? (
+                    <>
+                      <i className="fa-solid fa-spinner fa-spin"></i> Memverifikasi...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fa-solid fa-circle-check"></i> Verifikasi Kode
+                    </>
+                  )}
                 </button>
-              </div>
-            </form>
-          )}
 
-          {/* ================= SECURITY ================= */}
-          <div className="security-info">
-            <i className="fa-solid fa-shield-halved"></i>
-            <p>
-              Akses dilindungi Single Sign-On. Jangan bagikan kredensial Anda
-              kepada siapa pun.
-            </p>
-          </div>
+                {/* KIRIM ULANG KODE OTP */}
+                <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    disabled={resendCooldown > 0 || isResendingOtp}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: resendCooldown > 0 ? '#94a3b8' : '#16a385',
+                      cursor: resendCooldown > 0 || isResendingOtp ? 'not-allowed' : 'pointer',
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    {isResendingOtp ? (
+                      <>
+                        <i className="fa-solid fa-spinner fa-spin"></i> Mengirim ulang...
+                      </>
+                    ) : resendCooldown > 0 ? (
+                      <>
+                        <i className="fa-regular fa-clock"></i> Kirim ulang kode ({resendCooldown}s)
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa-solid fa-rotate-right"></i> Kirim ulang kode OTP
+                      </>
+                    )}
+                  </button>
+                </div>
 
-          {/* ================= SUPPORT ================= */}
-          <div className="support-info">
-            <p>
-              Kendala login? Hubungi <strong>admin MDSI</strong>
-            </p>
+                {/* KEMBALI KE FORM LOGIN */}
+                <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsOtpStep(false);
+                      setOtpValues(['', '', '', '', '', '']);
+                      setResendCooldown(0);
+                      setAlert(null);
+                      fetchCaptcha();
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#16a385',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <i className="fa-solid fa-arrow-left"></i> Kembali ke Form Login
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* ================= SECURITY ================= */}
+            <div className="security-info">
+              <i className="fa-solid fa-shield-halved"></i>
+              <p>
+                Akses dilindungi Single Sign-On. Jangan bagikan kredensial Anda
+                kepada siapa pun.
+              </p>
+            </div>
+
+            {/* ================= SUPPORT ================= */}
+            <div className="support-info">
+              <p>
+                Kendala login? Hubungi <strong>admin MDSI</strong>
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
