@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../assets/style/login.css';
 import bgLogin from '../assets/gambar/background_login.jpg';
 import { API_BASE } from '../config/api';
+import ForgotPassword from './ForgotPassword';
 import ResetPassword from './ResetPassword';
 
 const Login = ({ onLoginSuccess }) => {
@@ -26,7 +27,13 @@ const Login = ({ onLoginSuccess }) => {
   const [isResendingOtp, setIsResendingOtp] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
 
-  const [showResetPassword, setShowResetPassword] = useState(false);
+  // Alur "Lupa Password" punya 2 langkah:
+  //   'email' -> ForgotPassword.jsx: user masukkan email, backend cek email
+  //              ada di database lalu kirim OTP
+  //   'reset' -> ResetPassword.jsx: user masukkan OTP yang diterima + password baru
+  // null berarti sedang di form login biasa.
+  const [forgotPasswordStep, setForgotPasswordStep] = useState(null);
+  const [forgotPasswordData, setForgotPasswordData] = useState({ email: '', sessionId: '' });
 
   // Fungsi mengambil captcha dari API Backend
   const fetchCaptcha = async () => {
@@ -388,10 +395,20 @@ const Login = ({ onLoginSuccess }) => {
 
       {/* ================= BAGIAN KANAN ================= */}
       <div className="right-panel">
-        {showResetPassword ? (
-          <ResetPassword 
-            onBackToLogin={() => setShowResetPassword(false)}
-            onResetSuccess={() => setShowResetPassword(false)}
+        {forgotPasswordStep === 'email' ? (
+          <ForgotPassword
+            onEmailVerified={({ email, sessionId }) => {
+              setForgotPasswordData({ email, sessionId });
+              setForgotPasswordStep('reset');
+            }}
+            onBackToLogin={() => setForgotPasswordStep(null)}
+          />
+        ) : forgotPasswordStep === 'reset' ? (
+          <ResetPassword
+            email={forgotPasswordData.email}
+            sessionId={forgotPasswordData.sessionId}
+            onBackToLogin={() => setForgotPasswordStep(null)}
+            onResetSuccess={() => setForgotPasswordStep(null)}
           />
         ) : (
           <div className="login-wrapper">
@@ -494,7 +511,7 @@ const Login = ({ onLoginSuccess }) => {
                   {/* TRIGGER LUPA PASSWORD */}
                   <div style={{ textAlign: 'right', marginTop: '8px' }}>
                     <span
-                      onClick={() => setShowResetPassword(true)}
+                      onClick={() => setForgotPasswordStep('email')}
                       style={{
                         fontSize: '13px',
                         color: '#16a385',
