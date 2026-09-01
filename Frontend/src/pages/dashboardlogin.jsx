@@ -28,12 +28,11 @@ const Login = ({ onLoginSuccess }) => {
   const [resendCooldown, setResendCooldown] = useState(0);
 
   // Alur "Lupa Password" punya 2 langkah:
-  //   'email' -> ForgotPassword.jsx: user masukkan email, backend cek email
-  //              ada di database lalu kirim OTP
-  //   'reset' -> ResetPassword.jsx: user masukkan OTP yang diterima + password baru
+  //   'email' -> ForgotPassword.jsx: user masukkan email, backend kirim OTP
+  //   'reset' -> ResetPassword.jsx: user masukkan OTP + password baru
   // null berarti sedang di form login biasa.
   const [forgotPasswordStep, setForgotPasswordStep] = useState(null);
-  const [forgotPasswordData, setForgotPasswordData] = useState({ email: '', sessionId: '' });
+  const [forgotPasswordData, setForgotPasswordData] = useState({ email: '', resetId: '', otp: '' });
 
   // Fungsi mengambil captcha dari API Backend
   const fetchCaptcha = async () => {
@@ -43,7 +42,7 @@ const Login = ({ onLoginSuccess }) => {
         headers: {
           Accept: 'application/json'
         },
-        credentials: 'include'   // <-- TAMBAHKAN
+        credentials: 'include'
       });
 
       const responseText = await response.text();
@@ -131,7 +130,7 @@ const Login = ({ onLoginSuccess }) => {
           captcha_id: captcha.id,
           captcha_answer: formData.captchaAnswer
         }),
-        credentials: 'include'   // <-- TAMBAHKAN
+        credentials: 'include'
       });
 
       const responseText = await response.text();
@@ -224,7 +223,7 @@ const Login = ({ onLoginSuccess }) => {
           session_id: otpSessionId,
           username: otpUsername
         }),
-        credentials: 'include'   // <-- TAMBAHKAN
+        credentials: 'include'
       });
 
       const responseText = await response.text();
@@ -287,7 +286,7 @@ const Login = ({ onLoginSuccess }) => {
           username: otpUsername,
           otp: otpCode
         }),
-        credentials: 'include'   // <-- TAMBAHKAN
+        credentials: 'include'
       });
 
       const responseText = await response.text();
@@ -397,8 +396,8 @@ const Login = ({ onLoginSuccess }) => {
       <div className="right-panel">
         {forgotPasswordStep === 'email' ? (
           <ForgotPassword
-            onEmailVerified={({ email, sessionId }) => {
-              setForgotPasswordData({ email, sessionId });
+            onResetRequested={({ email, resetId, otp }) => {
+              setForgotPasswordData({ email, resetId, otp });
               setForgotPasswordStep('reset');
             }}
             onBackToLogin={() => setForgotPasswordStep(null)}
@@ -406,9 +405,13 @@ const Login = ({ onLoginSuccess }) => {
         ) : forgotPasswordStep === 'reset' ? (
           <ResetPassword
             email={forgotPasswordData.email}
-            sessionId={forgotPasswordData.sessionId}
+            resetId={forgotPasswordData.resetId}
+            otp={forgotPasswordData.otp}
             onBackToLogin={() => setForgotPasswordStep(null)}
-            onResetSuccess={() => setForgotPasswordStep(null)}
+            onResetSuccess={() => {
+              setForgotPasswordStep(null);
+              setAlert({ type: 'info', message: 'Password berhasil diubah. Silakan login dengan password baru.' });
+            }}
           />
         ) : (
           <div className="login-wrapper">

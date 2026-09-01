@@ -3,11 +3,11 @@ import '../assets/style/ForgotPassword.css';
 import { API_BASE } from '../config/api';
 
 // Langkah 1 dari alur "Lupa Password":
-// User memasukkan email -> backend cek apakah email itu terdaftar di
-// database -> kalau ada, backend kirim kode OTP ke email tsb dan
-// mengembalikan session_id. session_id + email itu yang dibawa ke
-// halaman berikutnya (ResetPassword) untuk verifikasi OTP + set password baru.
-const ForgotPassword = ({ onEmailVerified, onBackToLogin }) => {
+// User memasukkan email -> backend cek di SIMRS/SSO -> kalau ada,
+// backend kirim kode OTP ke email terdaftar dan mengembalikan reset_id.
+// reset_id + email itu yang dibawa ke halaman berikutnya (ResetPassword)
+// untuk verifikasi OTP + set password baru.
+const ForgotPassword = ({ onResetRequested, onBackToLogin }) => {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState(null);
@@ -42,19 +42,27 @@ const ForgotPassword = ({ onEmailVerified, onBackToLogin }) => {
       }
 
       if (!response.ok) {
-        // Backend sebaiknya tetap pakai pesan generik kalau email tidak
-        // ditemukan (supaya tidak bocorin daftar email terdaftar), tapi
-        // tetap tampilkan apa pun pesan yang dikirim backend di sini.
         throw new Error(data.message || 'Email tidak ditemukan di sistem kami.');
       }
 
-      if (!data.data || !data.data.session_id) {
-        throw new Error('Respons dari server tidak lengkap (session_id tidak ada).');
+      // Backend sengaja tidak mengirim reset_id kalau email tidak terdaftar
+      // (anti-enumeration: mencegah orang mengecek email mana yang valid).
+      // Ini BUKAN error, jadi cukup tampilkan pesan netral dari backend.
+      if (!data.data || !data.data.reset_id) {
+        setAlert({
+          type: 'info',
+          message:
+            data.message ||
+            'Jika email Anda terdaftar, kami akan mengirim instruksi reset password ke email Anda.'
+        });
+        return;
       }
 
-      onEmailVerified?.({
+      // Callback ke parent (halaman yang memanggil) dengan data reset
+      onResetRequested?.({
         email: email.trim(),
-        sessionId: data.data.session_id
+        resetId: data.data.reset_id,
+        otp: data.data.otp // OTP hanya ada di dev mode
       });
     } catch (error) {
       setAlert({ type: 'error', message: error.message });
@@ -97,7 +105,7 @@ const ForgotPassword = ({ onEmailVerified, onBackToLogin }) => {
           <div className="reset-input-group">
             <input
               type="email"
-              placeholder="Masukkan alamat email terdaftar"
+              placeholder="Masukkan email terdaftar"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoFocus
