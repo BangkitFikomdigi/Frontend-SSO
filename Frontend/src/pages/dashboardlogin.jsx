@@ -156,7 +156,7 @@ const Login = ({ onLoginSuccess }) => {
         setResendCooldown(30);
         setAlert({
           type: 'info',
-          message: data.message || 'Kode OTP telah dikirimkan ke email Anda. Silakan masukkan di bawah.'
+          message: data.message || 'Kode OTP telah dikirimkan ke email Anda. Silakan masukkan di bawah.' + (data.data.otp ? ` (OTP: ${data.data.otp})` : '')
         });
       } else if (data.data && data.data.access_token) {
         // Backend langsung memberi sesi aktif tanpa OTP
